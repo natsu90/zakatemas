@@ -22,7 +22,8 @@
           <button class="btn-delete" @click="handleDelete(entry)">✕</button>
         </div>
         <div class="card-body">
-          <div class="card-name">{{ entry.name_string }}</div>
+          <img v-if="entry.name_type === 'image'" :src="entry.name_string" class="card-image" />
+          <div v-else class="card-name">{{ entry.name_string }}</div>
           <div class="card-details">
             <span>{{ entry.gram }}g</span>
             <span v-if="entry.metal_type === 'gold' && entry.metal_state === 'physical' && entry.gold_percent">
@@ -167,6 +168,14 @@ const formatDate = (dateStr: string) => {
   font-size: 1rem;
   cursor: pointer;
   padding: 2px 6px;
+}
+
+.card-image {
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 6px;
+  object-fit: contain;
+  margin-bottom: 4px;
 }
 
 .card-name {
