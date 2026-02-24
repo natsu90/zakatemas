@@ -8,7 +8,10 @@ export default defineNuxtPlugin(() => {
   const remoteDb = new PouchDB('http://admin:password@localhost:5984/my_remote_db')
 
   // Sync (optional)
-  db.sync(remoteDb, { live: true, retry: true })
+  db.sync(remoteDb, { live: true, retry: true }).on('error', function (err) {
+    // Handle errors
+    console.log(err)
+  })
 
   return {
     provide: {

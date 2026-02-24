@@ -1,0 +1,230 @@
+<template>
+  <div class="container">
+    <header class="header">
+      <NuxtLink to="/" class="btn-back">← Kembali</NuxtLink>
+      <h1>Tambah Rekod</h1>
+    </header>
+
+    <form class="form" @submit.prevent="handleSubmit">
+      <!-- Metal Type -->
+      <div class="field">
+        <label class="label">Jenis Logam</label>
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'gold' }" @click="form.metal_type = 'gold'">
+            Emas
+          </button>
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'silver' }" @click="form.metal_type = 'silver'">
+            Perak
+          </button>
+        </div>
+      </div>
+
+      <!-- Metal State -->
+      <div class="field">
+        <label class="label">Bentuk</label>
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'physical' }" @click="form.metal_state = 'physical'">
+            Fizikal
+          </button>
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'digital' }" @click="form.metal_state = 'digital'">
+            Digital
+          </button>
+        </div>
+      </div>
+
+      <!-- Name Type -->
+      <div class="field">
+        <label class="label">Jenis Nama</label>
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn" :class="{ active: form.name_type === 'text' }" @click="form.name_type = 'text'">
+            Teks
+          </button>
+          <button type="button" class="toggle-btn" :class="{ active: form.name_type === 'image' }" @click="form.name_type = 'image'">
+            Gambar
+          </button>
+        </div>
+      </div>
+
+      <!-- Name String -->
+      <div class="field">
+        <label class="label">Nama</label>
+        <input v-model="form.name_string" type="text" class="input" placeholder="cth: Rantai tangan 916" required />
+      </div>
+
+      <!-- Physical Gold Only Fields -->
+      <template v-if="form.metal_type === 'gold' && form.metal_state === 'physical'">
+        <!-- Is Worn -->
+        <div class="field">
+          <label class="label">Status Pemakaian</label>
+          <div class="toggle-group">
+            <button type="button" class="toggle-btn" :class="{ active: form.is_worn }" @click="form.is_worn = true">
+              Dipakai
+            </button>
+            <button type="button" class="toggle-btn" :class="{ active: !form.is_worn }" @click="form.is_worn = false">
+              Disimpan
+            </button>
+          </div>
+        </div>
+
+        <!-- Gold Percent -->
+        <div class="field">
+          <label class="label">Ketulenan Emas (%)</label>
+          <input v-model.number="form.gold_percent" type="number" class="input" placeholder="cth: 91.6" min="0" max="100" step="0.1" />
+        </div>
+      </template>
+
+      <!-- Gram -->
+      <div class="field">
+        <label class="label">Berat (gram)</label>
+        <input v-model.number="form.gram" type="number" class="input" placeholder="cth: 10.5" min="0" step="0.01" required />
+      </div>
+
+      <!-- Date -->
+      <div class="field">
+        <label class="label">Tarikh</label>
+        <input v-model="form.date" type="date" class="input" required />
+      </div>
+
+      <button type="submit" class="btn-submit" :disabled="submitting">
+        {{ submitting ? 'Menyimpan...' : 'Simpan' }}
+      </button>
+    </form>
+  </div>
+</template>
+
+<script setup lang="ts">
+const router = useRouter()
+const { addEntry } = useEntries()
+
+const form = reactive({
+  metal_type: 'gold' as 'gold' | 'silver',
+  metal_state: 'physical' as 'physical' | 'digital',
+  name_string: '',
+  name_type: 'text' as 'text' | 'image',
+  is_worn: false,
+  gold_percent: null as number | null,
+  gram: null as number | null,
+  date: new Date().toISOString().split('T')[0],
+})
+
+const submitting = ref(false)
+
+const handleSubmit = async () => {
+  if (!form.gram) return
+
+  submitting.value = true
+  try {
+    await addEntry({
+      metal_type: form.metal_type,
+      metal_state: form.metal_state,
+      name_string: form.name_string,
+      name_type: form.name_type,
+      is_worn: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.is_worn : false,
+      gold_percent: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.gold_percent : null,
+      gram: form.gram,
+      date: form.date,
+    })
+    router.push('/')
+  } finally {
+    submitting.value = false
+  }
+}
+</script>
+
+<style scoped>
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.btn-back {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: #d4a017;
+}
+
+.toggle-group {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #666;
+}
+
+.toggle-btn.active {
+  background: #d4a017;
+  border-color: #d4a017;
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-submit {
+  margin-top: 8px;
+  padding: 14px;
+  background: #d4a017;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>

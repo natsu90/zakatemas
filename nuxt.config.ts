@@ -1,6 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: ['@vite-pwa/nuxt'],
+  vite: {
+    server: {
+      allowedHosts: true,
+    },
+  },
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
