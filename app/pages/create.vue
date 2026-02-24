@@ -69,7 +69,13 @@
         <!-- Gold Percent -->
         <div class="field">
           <label class="label">Ketulenan Emas (%)</label>
-          <input v-model.number="form.gold_percent" type="number" class="input" placeholder="cth: 91.6" min="0" max="100" step="0.1" />
+          <select v-model.number="form.gold_percent" class="input">
+            <option :value="null" disabled>Pilih ketulenan</option>
+            <option :value="99.9">99.9% (999)</option>
+            <option :value="91.6">91.6% (916)</option>
+            <option :value="83.3">83.3% (833)</option>
+            <option :value="75.0">75.0% (750)</option>
+          </select>
         </div>
       </template>
 
@@ -102,7 +108,7 @@ const form = reactive({
   name_string: '',
   name_type: 'text' as 'text' | 'image',
   is_worn: false,
-  gold_percent: null as number | null,
+  gold_percent: 99.9 as number | null,
   gram: null as number | null,
   date: new Date().toISOString().split('T')[0],
 })
