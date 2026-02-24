@@ -13,43 +13,71 @@
           <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'gold' }" @click="form.metal_type = 'gold'">
             Emas
           </button>
-          <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'silver' }" @click="form.metal_type = 'silver'">
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'silver' }" @click="form.metal_type = 'silver'; form.metal_state = 'physical'; form.name_string = ''; form.name_type = 'text'">
             Perak
           </button>
         </div>
       </div>
 
-      <!-- Metal State -->
-      <div class="field">
+      <!-- Metal State (gold only) -->
+      <div v-if="form.metal_type === 'gold'" class="field">
         <label class="label">Bentuk</label>
         <div class="toggle-group">
-          <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'physical' }" @click="form.metal_state = 'physical'">
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'physical' }" @click="form.metal_state = 'physical'; form.name_string = ''; form.name_type = 'text'">
             Fizikal
           </button>
-          <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'digital' }" @click="form.metal_state = 'digital'">
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'digital' }" @click="form.metal_state = 'digital'; form.name_string = ''; form.name_type = 'text'">
             Digital
           </button>
         </div>
       </div>
 
-      <!-- Name Type -->
-      <div class="field">
-        <label class="label">Jenis Nama</label>
-        <div class="toggle-group">
-          <button type="button" class="toggle-btn" :class="{ active: form.name_type === 'text' }" @click="form.name_type = 'text'">
-            Teks
-          </button>
-          <button type="button" class="toggle-btn" :class="{ active: form.name_type === 'image' }" @click="form.name_type = 'image'">
-            Gambar
-          </button>
-        </div>
+      <!-- Digital: name dropdown -->
+      <div v-if="form.metal_state === 'digital'" class="field">
+        <label class="label">Platform</label>
+        <select v-model="form.name_string" class="input" required>
+          <option value="" disabled>Pilih platform</option>
+          <option value="BURSA">Bursa Gold Dinar (BGD)</option>
+          <option value="MAYBANK">Maybank Islamic Gold Account-i (MIGA-i)</option>
+          <option value="TNG">e-Mas (TNG eWallet)</option>
+          <option value="PUBLIC_GOLD">Public Gold GAP</option>
+          <option value="CIMB">CIMB e-Gold Investment Account (eGIA)</option>
+        </select>
       </div>
 
-      <!-- Name String -->
-      <div class="field">
-        <label class="label">Nama</label>
-        <input v-model="form.name_string" type="text" class="input" placeholder="cth: Rantai tangan 916" required />
-      </div>
+      <!-- Physical: name type toggle -->
+      <template v-else>
+        <div class="field">
+          <label class="label">Jenis Nama</label>
+          <div class="toggle-group">
+            <button type="button" class="toggle-btn" :class="{ active: form.name_type === 'text' }" @click="form.name_type = 'text'; form.name_string = ''">
+              Teks
+            </button>
+            <button type="button" class="toggle-btn" :class="{ active: form.name_type === 'image' }" @click="form.name_type = 'image'; form.name_string = ''">
+              Gambar
+            </button>
+          </div>
+        </div>
+
+        <!-- Name String (text) -->
+        <div v-if="form.name_type === 'text'" class="field">
+          <label class="label">Nama</label>
+          <input v-model="form.name_string" type="text" class="input" placeholder="cth: Rantai tangan 916" required />
+        </div>
+
+        <!-- Name String (image) -->
+        <div v-else class="field">
+          <label class="label">Gambar</label>
+          <div class="image-upload" @click="fileInput?.click()">
+            <img v-if="form.name_string" :src="form.name_string" class="image-preview" />
+            <div v-else class="image-placeholder">
+              <span class="image-icon">📷</span>
+              <span>Tekan untuk muat naik</span>
+            </div>
+            <input ref="fileInput" type="file" accept="image/*" hidden @change="handleImageUpload" />
+          </div>
+        </div>
+      </template>
 
       <!-- Physical Gold Only Fields -->
       <template v-if="form.metal_type === 'gold' && form.metal_state === 'physical'">
@@ -88,7 +116,7 @@
       <!-- Date -->
       <div class="field">
         <label class="label">Tarikh</label>
-        <input v-model="form.date" type="date" class="input" required />
+        <input v-model="form.date" type="date" class="input" :max="today" required />
       </div>
 
       <button type="submit" class="btn-submit" :disabled="submitting">
@@ -102,6 +130,8 @@
 const router = useRouter()
 const { addEntry } = useEntries()
 
+const today = new Date().toISOString().split('T')[0]
+
 const form = reactive({
   metal_type: 'gold' as 'gold' | 'silver',
   metal_state: 'physical' as 'physical' | 'digital',
@@ -110,10 +140,21 @@ const form = reactive({
   is_worn: false,
   gold_percent: 99.9 as number | null,
   gram: null as number | null,
-  date: new Date().toISOString().split('T')[0],
+  date: today,
 })
 
+const fileInput = ref<HTMLInputElement>()
 const submitting = ref(false)
+
+const handleImageUpload = (e: Event) => {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    form.name_string = reader.result as string
+  }
+  reader.readAsDataURL(file)
+}
 
 const handleSubmit = async () => {
   if (!form.gram) return
@@ -215,6 +256,39 @@ const handleSubmit = async () => {
   border-color: #d4a017;
   color: #fff;
   font-weight: 600;
+}
+
+.image-upload {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.image-upload:active {
+  border-color: #d4a017;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.image-icon {
+  font-size: 1.5rem;
 }
 
 .btn-submit {
