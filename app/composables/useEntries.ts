@@ -29,10 +29,19 @@ export const useEntries = () => {
     await fetchEntries()
   }
 
+  const getEntry = async (id: string): Promise<Entry> => {
+    return await getDb().get(id)
+  }
+
+  const updateEntry = async (entry: Entry) => {
+    await getDb().put(entry)
+    await fetchEntries()
+  }
+
   const deleteEntry = async (entry: Entry) => {
     await getDb().remove(entry)
     await fetchEntries()
   }
 
-  return { entries, fetchEntries, addEntry, deleteEntry }
+  return { entries, fetchEntries, addEntry, getEntry, updateEntry, deleteEntry }
 }

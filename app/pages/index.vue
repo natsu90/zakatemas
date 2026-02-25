@@ -20,6 +20,7 @@
             {{ entry.metal_state === 'physical' ? 'Fizikal' : 'Digital' }}
           </span>
           <span class="badge gram">{{ entry.gram }}g</span>
+          <NuxtLink v-if="entry.metal_state === 'physical'" :to="`/edit/${entry._id}`" class="btn-edit">✎</NuxtLink>
           <button class="btn-delete" @click="handleDelete(entry)">✕</button>
         </div>
         <div class="card-body">
@@ -181,6 +182,14 @@ const formatDate = (dateStr: string) => {
   letter-spacing: 0;
 }
 
+.btn-edit {
+  margin-left: auto;
+  color: #aaa;
+  font-size: 1rem;
+  text-decoration: none;
+  padding: 2px 6px;
+}
+
 .btn-delete {
   margin-left: auto;
   background: none;
@@ -189,6 +198,10 @@ const formatDate = (dateStr: string) => {
   font-size: 1rem;
   cursor: pointer;
   padding: 2px 6px;
+}
+
+.btn-edit + .btn-delete {
+  margin-left: 0;
 }
 
 .card-image {
