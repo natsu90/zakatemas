@@ -19,19 +19,16 @@
           <span class="badge" :class="entry.metal_state">
             {{ entry.metal_state === 'physical' ? 'Fizikal' : 'Digital' }}
           </span>
+          <span class="badge gram">{{ entry.gram }}g</span>
           <button class="btn-delete" @click="handleDelete(entry)">✕</button>
         </div>
         <div class="card-body">
           <img v-if="entry.name_type === 'image'" :src="entry.name_string" class="card-image" />
           <div v-else class="card-name">{{ entry.metal_state === 'digital' ? platformNames[entry.name_string] || entry.name_string : entry.name_string }}</div>
-          <div class="card-details">
-            <span>{{ entry.gram }}g</span>
-            <span v-if="entry.metal_type === 'gold' && entry.metal_state === 'physical' && entry.gold_percent">
-              · {{ entry.gold_percent }}%
-            </span>
-            <span v-if="entry.metal_type === 'gold' && entry.metal_state === 'physical'">
-              · {{ entry.is_worn ? 'Dipakai' : 'Disimpan' }}
-            </span>
+          <div v-if="entry.metal_type === 'gold' && entry.metal_state === 'physical'" class="card-details">
+            <span v-if="entry.gold_percent">{{ entry.gold_percent }}%</span>
+            <span v-if="entry.gold_percent">·</span>
+            <span>{{ entry.is_worn ? 'Dipakai' : 'Disimpan' }}</span>
           </div>
           <div class="card-date">{{ formatDate(entry.date) }}</div>
         </div>
@@ -175,6 +172,13 @@ const formatDate = (dateStr: string) => {
 .badge.digital {
   background: #eff6ff;
   color: #1e40af;
+}
+
+.badge.gram {
+  background: #f3f4f6;
+  color: #374151;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .btn-delete {
