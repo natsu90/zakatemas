@@ -23,7 +23,7 @@
         </div>
         <div class="card-body">
           <img v-if="entry.name_type === 'image'" :src="entry.name_string" class="card-image" />
-          <div v-else class="card-name">{{ entry.name_string }}</div>
+          <div v-else class="card-name">{{ entry.metal_state === 'digital' ? platformNames[entry.name_string] || entry.name_string : entry.name_string }}</div>
           <div class="card-details">
             <span>{{ entry.gram }}g</span>
             <span v-if="entry.metal_type === 'gold' && entry.metal_state === 'physical' && entry.gold_percent">
@@ -51,6 +51,14 @@ const handleDelete = async (entry: any) => {
   if (confirm('Padam rekod ini?')) {
     await deleteEntry(entry)
   }
+}
+
+const platformNames: Record<string, string> = {
+  BURSA: 'Bursa Gold Dinar (BGD)',
+  MAYBANK: 'Maybank Islamic Gold Account-i (MIGA-i)',
+  TNG: 'e-Mas (TNG eWallet)',
+  PUBLIC_GOLD: 'Public Gold GAP',
+  CIMB: 'CIMB e-Gold Investment Account (eGIA)',
 }
 
 const formatDate = (dateStr: string) => {
