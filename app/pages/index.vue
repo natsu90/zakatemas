@@ -75,13 +75,22 @@ const formatDate = (dateStr: string) => {
   max-width: 480px;
   margin: 0 auto;
   padding: 16px;
+  padding-top: 68px;
 }
 
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  background: #fafafa;
 }
 
 .header h1 {
