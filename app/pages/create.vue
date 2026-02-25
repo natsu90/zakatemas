@@ -37,11 +37,13 @@
         <label class="label">Platform</label>
         <select v-model="form.name_string" class="input" required>
           <option value="" disabled>Pilih platform</option>
-          <option value="BURSA">Bursa Gold Dinar (BGD)</option>
-          <option value="MAYBANK">Maybank Islamic Gold Account-i (MIGA-i)</option>
-          <option value="TNG">e-Mas (TNG eWallet)</option>
-          <option value="PUBLIC_GOLD">Public Gold GAP</option>
-          <option value="CIMB">CIMB e-Gold Investment Account (eGIA)</option>
+          <option value="AGROBANK">Agrobank AGROGold Account-i</option>
+          <option value="BANKRAKYAT">Bank Rakyat eGold-i</option>
+          <option value="BSN">BSN MyGold Account-i</option>
+          <option value="BURSA">Bursa Gold Dinar</option>
+          <option value="MAYBANK">Maybank Islamic Gold Account-i</option>
+          <option value="MBSB">MBSB Bank PrimeGold-i</option>
+          <option value="PUBLICGOLD">Public Gold GAP</option>
         </select>
       </div>
 
