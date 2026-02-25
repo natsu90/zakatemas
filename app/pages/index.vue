@@ -20,7 +20,7 @@
             {{ entry.metal_state === 'physical' ? 'Fizikal' : 'Digital' }}
           </span>
           <span class="badge gram">{{ entry.gram }}g</span>
-          <NuxtLink v-if="entry.metal_state === 'physical'" :to="`/edit/${entry._id}`" class="btn-edit">✎</NuxtLink>
+          <NuxtLink :to="entry.metal_state === 'physical' ? `/edit/${entry._id}` : `/edit-digital/${entry.name_string}`" class="btn-edit">✎</NuxtLink>
           <button class="btn-delete" @click="handleDelete(entry)">✕</button>
         </div>
         <div class="card-body">
