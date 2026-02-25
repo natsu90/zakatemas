@@ -52,11 +52,13 @@ const handleDelete = async (entry: any) => {
 }
 
 const platformNames: Record<string, string> = {
-  BURSA: 'Bursa Gold Dinar (BGD)',
-  MAYBANK: 'Maybank Islamic Gold Account-i (MIGA-i)',
-  TNG: 'e-Mas (TNG eWallet)',
-  PUBLIC_GOLD: 'Public Gold GAP',
-  CIMB: 'CIMB e-Gold Investment Account (eGIA)',
+  AGROBANK: 'Agrobank AGROGold Account-i',
+  BANKRAKYAT: 'Bank Rakyat eGold-i',
+  BSN: 'BSN MyGold Account-i',
+  BURSA: 'Bursa Gold Dinar',
+  MAYBANK: 'Maybank Islamic Gold Account-i',
+  MBSB: 'MBSB Bank PrimeGold-i',
+  PUBLICGOLD: 'Public Gold GAP',
 }
 
 const formatDate = (dateStr: string) => {
