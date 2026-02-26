@@ -112,6 +112,11 @@
       <!-- Gram -->
       <div class="field">
         <label class="label">Berat (gram)</label>
+        <div v-if="form.metal_state === 'physical'" class="shortcut-row">
+          <button v-for="s in gramShortcuts" :key="s.label" type="button" class="shortcut-btn" @click="form.gram = s.value">
+            {{ s.label }}
+          </button>
+        </div>
         <input v-model.number="form.gram" type="number" class="input" placeholder="cth: 10.5" min="0" step="0.01" required />
       </div>
 
@@ -147,6 +152,23 @@ const form = reactive({
 
 const fileInput = ref<HTMLInputElement>()
 const submitting = ref(false)
+
+const gramShortcuts = computed(() => {
+  if (form.metal_type === 'gold') {
+    return [
+      { label: '½ dinar', value: 2.125 },
+      { label: '1 dinar', value: 4.25 },
+      { label: '5 dinar', value: 21.25 },
+      { label: '1 oz', value: 31.1 },
+    ]
+  }
+  return [
+    { label: '1 dirham', value: 2.975 },
+    { label: '5 dirham', value: 14.875 },
+    { label: '10 dirham', value: 29.75 },
+    { label: '1 oz', value: 31.1 },
+  ]
+})
 
 const handleImageUpload = (e: Event) => {
   const file = (e.target as HTMLInputElement).files?.[0]
@@ -258,6 +280,29 @@ const handleSubmit = async () => {
   border-color: #d4a017;
   color: #fff;
   font-weight: 600;
+}
+
+.shortcut-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.shortcut-btn {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.shortcut-btn:active {
+  background: #d4a017;
+  border-color: #d4a017;
+  color: #fff;
 }
 
 .image-upload {
