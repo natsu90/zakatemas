@@ -45,7 +45,7 @@
             <img v-if="item.entry.name_type === 'image'" :src="item.entry.name_string" class="card-image" />
             <div v-else class="card-name">{{ item.entry.name_string }}</div>
             <div v-if="item.entry.metal_type === 'gold'" class="card-details">
-              <span v-if="item.entry.gold_percent">{{ item.entry.gold_percent }}%</span>
+              <span v-if="item.entry.gold_percent">{{ item.entry.gold_percent }}</span>
               <span v-if="item.entry.gold_percent">·</span>
               <span>{{ item.entry.is_worn ? 'Dipakai' : 'Disimpan' }}</span>
             </div>

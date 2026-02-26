@@ -7,6 +7,8 @@ interface Entry {
   name_type: 'text' | 'image'
   is_worn: boolean
   gold_percent: number | null
+  is_collateral: boolean
+  loan_amount: number | null
   gram: number
   date: string
 }

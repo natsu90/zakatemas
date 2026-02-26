@@ -15,7 +15,7 @@
         </span>
         <span class="badge physical">Fizikal</span>
         <span v-if="entry.metal_type === 'gold' && entry.gold_percent" class="badge gold">
-          {{ entry.gold_percent }}%
+          {{ entry.gold_percent }}
         </span>
       </div>
 
@@ -64,15 +64,35 @@
         </div>
       </div>
 
-      <!-- Gram (reduce only) -->
+      <!-- Collateral (gold, not worn) -->
+      <template v-if="entry.metal_type === 'gold' && !form.is_worn">
+        <div class="field">
+          <label class="label">Ar-Rahnu (Cagaran)</label>
+          <div class="toggle-group">
+            <button type="button" class="toggle-btn" :class="{ active: form.is_collateral }" @click="form.is_collateral = true">
+              Ya
+            </button>
+            <button type="button" class="toggle-btn" :class="{ active: !form.is_collateral }" @click="form.is_collateral = false; form.loan_amount = null">
+              Tidak
+            </button>
+          </div>
+        </div>
+
+        <div v-if="form.is_collateral" class="field">
+          <label class="label">Jumlah Pinjaman + Upah (RM)</label>
+          <input v-model.number="form.loan_amount" type="number" class="input" placeholder="cth: 5000" min="0" step="0.01" required />
+        </div>
+      </template>
+
+      <!-- Gram (reduce only, locked if collateral) -->
       <div class="field">
-        <label class="label">Berat (gram) — maks {{ entry.gram }}g</label>
-        <div class="shortcut-row">
+        <label class="label">Berat (gram){{ form.is_collateral ? '' : ` — maks ${entry.gram}g` }}</label>
+        <div v-if="!form.is_collateral" class="shortcut-row">
           <button v-for="s in gramShortcuts" :key="s.label" type="button" class="shortcut-btn" :disabled="s.value > entry.gram" @click="form.gram = s.value">
             {{ s.label }}
           </button>
         </div>
-        <input v-model.number="form.gram" type="number" class="input" :max="entry.gram" min="0.01" step="0.01" required />
+        <input v-model.number="form.gram" type="number" class="input" :max="entry.gram" min="0.01" step="0.01" required :disabled="form.is_collateral" />
       </div>
 
       <button type="submit" class="btn-submit" :disabled="submitting">
@@ -94,6 +114,8 @@ const form = reactive({
   name_type: 'text' as 'text' | 'image',
   name_string: '',
   is_worn: false,
+  is_collateral: false,
+  loan_amount: null as number | null,
   gram: 0,
 })
 
@@ -137,6 +159,8 @@ onMounted(async () => {
     form.name_type = doc.name_type
     form.name_string = doc.name_string
     form.is_worn = doc.is_worn
+    form.is_collateral = doc.is_collateral || false
+    form.loan_amount = doc.loan_amount || null
     form.gram = doc.gram
   } finally {
     loading.value = false
@@ -163,6 +187,8 @@ const handleSubmit = async () => {
       name_type: form.name_type,
       name_string: form.name_string,
       is_worn: entry.value.metal_type === 'gold' ? form.is_worn : entry.value.is_worn,
+      is_collateral: entry.value.metal_type === 'gold' && !form.is_worn ? form.is_collateral : false,
+      loan_amount: entry.value.metal_type === 'gold' && !form.is_worn && form.is_collateral ? form.loan_amount : null,
       gram: form.gram,
     })
     router.push('/')

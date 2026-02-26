@@ -98,15 +98,35 @@
 
         <!-- Gold Percent -->
         <div class="field">
-          <label class="label">Ketulenan Emas (%)</label>
+          <label class="label">Ketulenan Emas</label>
           <select v-model.number="form.gold_percent" class="input">
             <option :value="null" disabled>Pilih ketulenan</option>
-            <option :value="99.9">99.9% (999)</option>
-            <option :value="91.6">91.6% (916)</option>
-            <option :value="83.3">83.3% (833)</option>
-            <option :value="75.0">75.0% (750)</option>
+            <option :value="999">999</option>
+            <option :value="916">916</option>
+            <option :value="833">833</option>
+            <option :value="750">750</option>
           </select>
         </div>
+
+        <!-- Collateral (only when not worn) -->
+        <template v-if="!form.is_worn">
+          <div class="field">
+            <label class="label">Ar-Rahnu (Cagaran)</label>
+            <div class="toggle-group">
+              <button type="button" class="toggle-btn" :class="{ active: form.is_collateral }" @click="form.is_collateral = true">
+                Ya
+              </button>
+              <button type="button" class="toggle-btn" :class="{ active: !form.is_collateral }" @click="form.is_collateral = false; form.loan_amount = null">
+                Tidak
+              </button>
+            </div>
+          </div>
+
+          <div v-if="form.is_collateral" class="field">
+            <label class="label">Jumlah Pinjaman + Upah (RM)</label>
+            <input v-model.number="form.loan_amount" type="number" class="input" placeholder="cth: 5000" min="0" step="0.01" required />
+          </div>
+        </template>
       </template>
 
       <!-- Gram -->
@@ -145,7 +165,9 @@ const form = reactive({
   name_string: '',
   name_type: 'text' as 'text' | 'image',
   is_worn: false,
-  gold_percent: 99.9 as number | null,
+  gold_percent: 999 as number | null,
+  is_collateral: false,
+  loan_amount: null as number | null,
   gram: null as number | null,
   date: today,
 })
@@ -192,6 +214,8 @@ const handleSubmit = async () => {
       name_type: form.name_type,
       is_worn: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.is_worn : false,
       gold_percent: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.gold_percent : null,
+      is_collateral: form.metal_type === 'gold' && form.metal_state === 'physical' && !form.is_worn ? form.is_collateral : false,
+      loan_amount: form.metal_type === 'gold' && form.metal_state === 'physical' && !form.is_worn && form.is_collateral ? form.loan_amount : null,
       gram: form.gram,
       date: form.date,
     })

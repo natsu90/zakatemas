@@ -168,7 +168,9 @@ const handleSubmit = async () => {
         name_string: platform,
         name_type: 'text',
         is_worn: false,
-        gold_percent: 99.9,
+        gold_percent: 999,
+        is_collateral: false,
+        loan_amount: null,
         gram: denom,
         date: lastDate,
       })
