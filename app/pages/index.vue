@@ -5,34 +5,53 @@
       <NuxtLink to="/create" class="btn-add">+ Tambah</NuxtLink>
     </header>
 
-    <div v-if="entries.length === 0" class="empty">
+    <div v-if="displayItems.length === 0" class="empty">
       <p>Tiada rekod lagi.</p>
       <NuxtLink to="/create" class="btn-primary">Tambah Rekod Pertama</NuxtLink>
     </div>
 
     <ul v-else class="list">
-      <li v-for="entry in entries" :key="entry._id" class="card">
-        <div class="card-header">
-          <span class="badge" :class="entry.metal_type">
-            {{ entry.metal_type === 'gold' ? 'Emas' : 'Perak' }}
-          </span>
-          <span class="badge" :class="entry.metal_state">
-            {{ entry.metal_state === 'physical' ? 'Fizikal' : 'Digital' }}
-          </span>
-          <span class="badge gram">{{ entry.gram }}g</span>
-          <NuxtLink :to="entry.metal_state === 'physical' ? `/edit/${entry._id}` : `/edit-digital/${entry.name_string}`" class="btn-edit">✎</NuxtLink>
-          <button class="btn-delete" @click="handleDelete(entry)">✕</button>
-        </div>
-        <div class="card-body">
-          <img v-if="entry.name_type === 'image'" :src="entry.name_string" class="card-image" />
-          <div v-else class="card-name">{{ entry.metal_state === 'digital' ? platformNames[entry.name_string] || entry.name_string : entry.name_string }}</div>
-          <div v-if="entry.metal_type === 'gold' && entry.metal_state === 'physical'" class="card-details">
-            <span v-if="entry.gold_percent">{{ entry.gold_percent }}%</span>
-            <span v-if="entry.gold_percent">·</span>
-            <span>{{ entry.is_worn ? 'Dipakai' : 'Disimpan' }}</span>
+      <li v-for="item in displayItems" :key="item.key" class="card">
+        <!-- Grouped digital gold card -->
+        <template v-if="item.type === 'digital-group'">
+          <div class="card-header">
+            <span class="badge gold">Emas</span>
+            <span class="badge digital">Digital</span>
+            <span class="badge gram">{{ item.totalGram }}g</span>
+            <NuxtLink :to="`/edit-digital/${item.platform}`" class="btn-edit">✎</NuxtLink>
           </div>
-          <div class="card-date">{{ formatDate(entry.date) }}</div>
-        </div>
+          <div class="card-body">
+            <div class="card-name">{{ platformNames[item.platform] || item.platform }}</div>
+            <div class="records-summary">
+              <div v-for="e in item.entries" :key="e._id" class="record-row">
+                <span class="record-date">{{ formatDate(e.date) }}</span>
+                <span class="record-gram">{{ e.gram }}g</span>
+              </div>
+            </div>
+          </div>
+        </template>
+        <!-- Individual entry card -->
+        <template v-else>
+          <div class="card-header">
+            <span class="badge" :class="item.entry.metal_type">
+              {{ item.entry.metal_type === 'gold' ? 'Emas' : 'Perak' }}
+            </span>
+            <span class="badge physical">Fizikal</span>
+            <span class="badge gram">{{ item.entry.gram }}g</span>
+            <NuxtLink :to="`/edit/${item.entry._id}`" class="btn-edit">✎</NuxtLink>
+            <button class="btn-delete" @click="handleDelete(item.entry)">✕</button>
+          </div>
+          <div class="card-body">
+            <img v-if="item.entry.name_type === 'image'" :src="item.entry.name_string" class="card-image" />
+            <div v-else class="card-name">{{ item.entry.name_string }}</div>
+            <div v-if="item.entry.metal_type === 'gold'" class="card-details">
+              <span v-if="item.entry.gold_percent">{{ item.entry.gold_percent }}%</span>
+              <span v-if="item.entry.gold_percent">·</span>
+              <span>{{ item.entry.is_worn ? 'Dipakai' : 'Disimpan' }}</span>
+            </div>
+            <div class="card-date">{{ formatDate(item.entry.date) }}</div>
+          </div>
+        </template>
       </li>
     </ul>
   </div>
@@ -43,6 +62,38 @@ const { entries, fetchEntries, deleteEntry } = useEntries()
 
 onMounted(() => {
   fetchEntries()
+})
+
+type DisplayItem =
+  | { type: 'entry'; key: string; entry: any }
+  | { type: 'digital-group'; key: string; platform: string; totalGram: number; count: number; entries: any[] }
+
+const displayItems = computed<DisplayItem[]>(() => {
+  const items: DisplayItem[] = []
+  const digitalGroups = new Map<string, any[]>()
+
+  for (const e of entries.value) {
+    if (e.metal_state === 'digital') {
+      const group = digitalGroups.get(e.name_string) || []
+      group.push(e)
+      digitalGroups.set(e.name_string, group)
+    } else {
+      items.push({ type: 'entry', key: e._id, entry: e })
+    }
+  }
+
+  for (const [platform, group] of digitalGroups) {
+    items.push({
+      type: 'digital-group',
+      key: `digital-${platform}`,
+      platform,
+      totalGram: parseFloat(group.reduce((sum: number, e: any) => sum + e.gram, 0).toFixed(2)),
+      count: group.length,
+      entries: group,
+    })
+  }
+
+  return items
 })
 
 const handleDelete = async (entry: any) => {
@@ -229,5 +280,27 @@ const formatDate = (dateStr: string) => {
   font-size: 0.75rem;
   color: #999;
   margin-top: 6px;
+}
+
+.records-summary {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.record-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.record-date {
+  color: #999;
+}
+
+.record-gram {
+  font-weight: 600;
+  color: #444;
 }
 </style>
