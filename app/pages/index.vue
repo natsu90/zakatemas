@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <header class="header">
-      <h1>Zakat Emas</h1>
+      <h1>Zakat Emas & Perak</h1>
       <NuxtLink to="/create" class="btn-add">+ Tambah</NuxtLink>
     </header>
 
