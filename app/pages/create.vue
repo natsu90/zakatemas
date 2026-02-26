@@ -142,7 +142,7 @@
 
       <!-- Date -->
       <div class="field">
-        <label class="label">Tarikh</label>
+        <label class="label">Tarikh Dimiliki/Akhir Zakat Dibayar</label>
         <input v-model="form.date" type="date" class="input" :max="today" required />
       </div>
 
