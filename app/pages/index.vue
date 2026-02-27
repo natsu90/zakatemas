@@ -47,7 +47,7 @@
             <div v-if="item.entry.metal_type === 'gold'" class="card-details">
               <span v-if="item.entry.gold_percent">{{ item.entry.gold_percent }}</span>
               <span v-if="item.entry.gold_percent">·</span>
-              <span>{{ item.entry.is_worn ? 'Dipakai' : 'Disimpan' }}</span>
+              <span>{{ item.entry.is_worn ? 'Barang Kemas' : 'Pelaburan' }}</span>
             </div>
             <div class="card-date">{{ formatDate(item.entry.date) }}</div>
           </div>

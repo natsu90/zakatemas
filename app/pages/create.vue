@@ -32,6 +32,19 @@
         </div>
       </div>
 
+      <!-- Is Worn (physical gold only) -->
+      <div v-if="form.metal_type === 'gold' && form.metal_state === 'physical'" class="field">
+        <label class="label">Status Pemakaian</label>
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn" :class="{ active: form.is_worn }" @click="form.is_worn = true">
+            Barang Kemas
+          </button>
+          <button type="button" class="toggle-btn" :class="{ active: !form.is_worn }" @click="form.is_worn = false">
+            Pelaburan
+          </button>
+        </div>
+      </div>
+
       <!-- Digital: name dropdown -->
       <div v-if="form.metal_state === 'digital'" class="field">
         <label class="label">Platform</label>
@@ -83,19 +96,6 @@
 
       <!-- Physical Gold Only Fields -->
       <template v-if="form.metal_type === 'gold' && form.metal_state === 'physical'">
-        <!-- Is Worn -->
-        <div class="field">
-          <label class="label">Status Pemakaian</label>
-          <div class="toggle-group">
-            <button type="button" class="toggle-btn" :class="{ active: form.is_worn }" @click="form.is_worn = true">
-              Dipakai
-            </button>
-            <button type="button" class="toggle-btn" :class="{ active: !form.is_worn }" @click="form.is_worn = false">
-              Disimpan
-            </button>
-          </div>
-        </div>
-
         <!-- Gold Percent -->
         <div class="field">
           <label class="label">Ketulenan Emas</label>
@@ -153,7 +153,7 @@
 
       <!-- Date -->
       <div class="field">
-        <label class="label">Tarikh Dimiliki/Akhir Zakat Dibayar</label>
+        <label class="label">Tarikh Pemilikan/Akhir Zakat Dibayar</label>
         <input v-model="form.date" type="date" class="input" :max="today" required />
       </div>
 
