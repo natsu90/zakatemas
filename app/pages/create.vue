@@ -127,6 +127,19 @@
         </div>
       </template>
 
+      <!-- Bulk (physical only) -->
+      <div v-if="form.metal_state === 'physical'" class="field">
+        <label class="label">Bilangan Item</label>
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn" :class="{ active: form.is_bulk }" @click="form.is_bulk = true">
+            Pukal
+          </button>
+          <button type="button" class="toggle-btn" :class="{ active: !form.is_bulk }" @click="form.is_bulk = false">
+            Satu Item
+          </button>
+        </div>
+      </div>
+
       <!-- Gram -->
       <div class="field">
         <label class="label">Berat (gram)</label>
@@ -166,6 +179,7 @@ const form = reactive({
   gold_percent: 999 as number | null,
   is_collateral: false,
   loan_amount: null as number | null,
+  is_bulk: false,
   gram: null as number | null,
   date: today,
 })
@@ -214,6 +228,7 @@ const handleSubmit = async () => {
       gold_percent: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.gold_percent : null,
       is_collateral: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.is_collateral : false,
       loan_amount: form.metal_type === 'gold' && form.metal_state === 'physical' && form.is_collateral ? form.loan_amount : null,
+      is_bulk: form.metal_state === 'physical' ? form.is_bulk : false,
       gram: form.gram,
       date: form.date,
     })

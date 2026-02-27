@@ -9,6 +9,7 @@ interface Entry {
   gold_percent: number | null
   is_collateral: boolean
   loan_amount: number | null
+  is_bulk: boolean
   gram: number
   date: string
 }

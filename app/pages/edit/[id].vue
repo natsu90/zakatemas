@@ -74,12 +74,12 @@
       <!-- Gram (reduce only, locked if collateral) -->
       <div class="field">
         <label class="label">Berat (gram){{ form.is_collateral ? '' : ` — maks ${entry.gram}g` }}</label>
-        <div v-if="!form.is_collateral && !entry.is_worn" class="shortcut-row">
+        <div v-if="entry.is_bulk && !form.is_collateral && !entry.is_worn" class="shortcut-row">
           <button v-for="s in gramShortcuts" :key="s.label" type="button" class="shortcut-btn" :disabled="s.value > entry.gram" @click="form.gram = s.value">
             {{ s.label }}
           </button>
         </div>
-        <input v-model.number="form.gram" type="number" class="input" :max="entry.gram" min="0.01" step="0.01" required :disabled="form.is_collateral || entry.is_collateral" />
+        <input v-model.number="form.gram" type="number" class="input" :max="entry.gram" min="0.01" step="0.01" required :disabled="!entry.is_bulk || form.is_collateral || entry.is_collateral" />
       </div>
 
       <button type="submit" class="btn-submit" :disabled="submitting">

@@ -171,6 +171,7 @@ const handleSubmit = async () => {
         gold_percent: 999,
         is_collateral: false,
         loan_amount: null,
+        is_bulk: false,
         gram: denom,
         date: lastDate,
       })
