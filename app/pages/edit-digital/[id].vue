@@ -49,14 +49,14 @@
         <div class="denom-grid">
           <button
             v-for="d in denominations"
-            :key="d"
+            :key="d.value"
             type="button"
             class="denom-btn"
-            :class="{ active: selectedDenom === d, disabled: d > totalGram }"
-            :disabled="d > totalGram"
-            @click="selectedDenom = d"
+            :class="{ active: selectedDenom === d.value, disabled: d.value > totalGram }"
+            :disabled="d.value > totalGram"
+            @click="selectedDenom = d.value"
           >
-            {{ d }}g
+            {{ d.label }}
           </button>
         </div>
       </div>
@@ -83,7 +83,29 @@ const platformNames: Record<string, string> = {
   PUBLICGOLD: 'Public Gold GAP',
 }
 
-const denominations = [1, 5, 10, 20, 50, 100, 250, 1000]
+const denominations = computed(() => {
+  if (platform === 'BURSA') return [{ label: '1 dinar', value: 4.25 }]
+  if (platform === 'PUBLICGOLD') return [
+    { label: '1g', value: 1 },
+    { label: '5g', value: 5 },
+    { label: '10g', value: 10 },
+    { label: '20g', value: 20 },
+    { label: '50g', value: 50 },
+    { label: '½ dinar', value: 2.125 },
+    { label: '1 dinar', value: 4.25 },
+    { label: '5 dinar', value: 21.25 },
+  ]
+  return [
+    { label: '1g', value: 1 },
+    { label: '5g', value: 5 },
+    { label: '10g', value: 10 },
+    { label: '20g', value: 20 },
+    { label: '50g', value: 50 },
+    { label: '100g', value: 100 },
+    { label: '250g', value: 250 },
+    { label: '1000g', value: 1000 },
+  ]
+})
 
 const platform = route.params.id as string
 const loading = ref(true)
@@ -159,13 +181,14 @@ const handleSubmit = async () => {
     } else {
       const denom = selectedDenom.value!
 
+      const denomLabel = denominations.value.find(d => d.value === denom)?.label || `${denom}g`
       const lastDate = await deductFromEntries(denom)
 
       // Create new physical gold record
       await addEntry({
         metal_type: 'gold',
         metal_state: 'physical',
-        name_string: platform,
+        name_string: `${platform} ${denomLabel}`,
         name_type: 'text',
         is_worn: false,
         gold_percent: 999,
