@@ -108,31 +108,29 @@
           </select>
         </div>
 
-        <!-- Collateral (only when not worn) -->
-        <template v-if="!form.is_worn">
-          <div class="field">
-            <label class="label">Ar-Rahnu (Cagaran)</label>
-            <div class="toggle-group">
-              <button type="button" class="toggle-btn" :class="{ active: form.is_collateral }" @click="form.is_collateral = true">
-                Ya
-              </button>
-              <button type="button" class="toggle-btn" :class="{ active: !form.is_collateral }" @click="form.is_collateral = false; form.loan_amount = null">
-                Tidak
-              </button>
-            </div>
+        <!-- Collateral -->
+        <div class="field">
+          <label class="label">Ar-Rahnu (Cagaran)</label>
+          <div class="toggle-group">
+            <button type="button" class="toggle-btn" :class="{ active: form.is_collateral }" @click="form.is_collateral = true">
+              Ya
+            </button>
+            <button type="button" class="toggle-btn" :class="{ active: !form.is_collateral }" @click="form.is_collateral = false; form.loan_amount = null">
+              Tidak
+            </button>
           </div>
+        </div>
 
-          <div v-if="form.is_collateral" class="field">
-            <label class="label">Jumlah Pinjaman + Upah (RM)</label>
-            <input v-model.number="form.loan_amount" type="number" class="input" placeholder="cth: 5000" min="0" step="0.01" required />
-          </div>
-        </template>
+        <div v-if="form.is_collateral" class="field">
+          <label class="label">Jumlah Pinjaman + Upah (RM)</label>
+          <input v-model.number="form.loan_amount" type="number" class="input" placeholder="cth: 5000" min="0" step="0.01" required />
+        </div>
       </template>
 
       <!-- Gram -->
       <div class="field">
         <label class="label">Berat (gram)</label>
-        <div v-if="form.metal_state === 'physical'" class="shortcut-row">
+        <div v-if="form.metal_state === 'physical' && !form.is_worn" class="shortcut-row">
           <button v-for="s in gramShortcuts" :key="s.label" type="button" class="shortcut-btn" @click="form.gram = s.value">
             {{ s.label }}
           </button>
@@ -214,8 +212,8 @@ const handleSubmit = async () => {
       name_type: form.name_type,
       is_worn: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.is_worn : false,
       gold_percent: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.gold_percent : null,
-      is_collateral: form.metal_type === 'gold' && form.metal_state === 'physical' && !form.is_worn ? form.is_collateral : false,
-      loan_amount: form.metal_type === 'gold' && form.metal_state === 'physical' && !form.is_worn && form.is_collateral ? form.loan_amount : null,
+      is_collateral: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.is_collateral : false,
+      loan_amount: form.metal_type === 'gold' && form.metal_state === 'physical' && form.is_collateral ? form.loan_amount : null,
       gram: form.gram,
       date: form.date,
     })
