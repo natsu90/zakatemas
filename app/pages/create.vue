@@ -13,7 +13,7 @@
           <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'gold' }" @click="form.metal_type = 'gold'">
             Emas
           </button>
-          <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'silver' }" @click="form.metal_type = 'silver'; form.metal_state = 'physical'; form.name_string = ''; form.name_type = 'text'">
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'silver' }" @click="form.metal_type = 'silver'; form.metal_state = 'physical'; form.name_string = ''; form.image_string = ''">
             Perak
           </button>
         </div>
@@ -23,10 +23,10 @@
       <div v-if="form.metal_type === 'gold'" class="field">
         <label class="label">Bentuk</label>
         <div class="toggle-group">
-          <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'physical' }" @click="form.metal_state = 'physical'; form.name_string = ''; form.name_type = 'text'">
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'physical' }" @click="form.metal_state = 'physical'; form.name_string = ''; form.image_string = ''">
             Fizikal
           </button>
-          <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'digital' }" @click="form.metal_state = 'digital'; form.name_string = ''; form.name_type = 'text'">
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'digital' }" @click="form.metal_state = 'digital'; form.name_string = ''; form.image_string = ''">
             Digital
           </button>
         </div>
@@ -60,32 +60,22 @@
         </select>
       </div>
 
-      <!-- Physical: name type toggle -->
-      <template v-else>
+      <!-- Physical: name & image inputs -->
+      <template v-if="form.metal_state === 'physical'">
+        <div v-if="showNameImageHint" class="hint">Sila isi sekurang-kurangnya nama atau gambar.</div>
         <div class="field">
-          <label class="label">Jenis Nama</label>
-          <div class="toggle-group">
-            <button type="button" class="toggle-btn" :class="{ active: form.name_type === 'text' }" @click="form.name_type = 'text'; form.name_string = ''">
-              Teks
-            </button>
-            <button type="button" class="toggle-btn" :class="{ active: form.name_type === 'image' }" @click="form.name_type = 'image'; form.name_string = ''">
-              Gambar
-            </button>
-          </div>
-        </div>
-
-        <!-- Name String (text) -->
-        <div v-if="form.name_type === 'text'" class="field">
           <label class="label">Nama</label>
-          <input v-model="form.name_string" type="text" class="input" placeholder="cth: Rantai tangan 916" required />
+          <input v-model="form.name_string" type="text" class="input" placeholder="cth: Rantai tangan 916" />
         </div>
 
-        <!-- Name String (image) -->
-        <div v-else class="field">
+        <div class="field">
           <label class="label">Gambar</label>
-          <div class="image-upload" @click="fileInput?.click()">
-            <img v-if="form.name_string" :src="form.name_string" class="image-preview" />
-            <div v-else class="image-placeholder">
+          <div v-if="form.image_string" class="image-wrapper">
+            <img :src="form.image_string" class="image-preview" />
+            <button type="button" class="btn-remove-image" @click="form.image_string = ''">✕</button>
+          </div>
+          <div v-else class="image-upload" @click="fileInput?.click()">
+            <div class="image-placeholder">
               <span class="image-icon">📷</span>
               <span>Tekan untuk muat naik</span>
             </div>
@@ -174,7 +164,7 @@ const form = reactive({
   metal_type: 'gold' as 'gold' | 'silver',
   metal_state: 'physical' as 'physical' | 'digital',
   name_string: '',
-  name_type: 'text' as 'text' | 'image',
+  image_string: '',
   is_worn: false,
   gold_percent: 999 as number | null,
   is_collateral: false,
@@ -186,6 +176,7 @@ const form = reactive({
 
 const fileInput = ref<HTMLInputElement>()
 const submitting = ref(false)
+const showNameImageHint = ref(false)
 
 const gramShortcuts = computed(() => {
   if (form.metal_type === 'gold') {
@@ -209,13 +200,18 @@ const handleImageUpload = (e: Event) => {
   if (!file) return
   const reader = new FileReader()
   reader.onload = () => {
-    form.name_string = reader.result as string
+    form.image_string = reader.result as string
   }
   reader.readAsDataURL(file)
 }
 
 const handleSubmit = async () => {
   if (!form.gram) return
+  if (form.metal_state === 'physical' && !form.name_string.trim() && !form.image_string) {
+    showNameImageHint.value = true
+    return
+  }
+  showNameImageHint.value = false
 
   submitting.value = true
   try {
@@ -223,7 +219,7 @@ const handleSubmit = async () => {
       metal_type: form.metal_type,
       metal_state: form.metal_state,
       name_string: form.name_string,
-      name_type: form.name_type,
+      image_string: form.metal_state === 'physical' ? form.image_string : '',
       is_worn: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.is_worn : false,
       gold_percent: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.gold_percent : null,
       is_collateral: form.metal_type === 'gold' && form.metal_state === 'physical' ? form.is_collateral : false,
@@ -355,11 +351,33 @@ const handleSubmit = async () => {
   border-color: #d4a017;
 }
 
+.image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .image-preview {
   max-width: 100%;
   max-height: 200px;
   border-radius: 6px;
   object-fit: contain;
+}
+
+.btn-remove-image {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .image-placeholder {
@@ -390,5 +408,13 @@ const handleSubmit = async () => {
 .btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 8px 12px;
+  border-radius: 8px;
 }
 </style>

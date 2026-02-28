@@ -19,31 +19,23 @@
         </span>
       </div>
 
-      <!-- Name Type -->
+      <div v-if="showNameImageHint" class="hint">Sila isi sekurang-kurangnya nama atau gambar.</div>
+
+      <!-- Name -->
       <div class="field">
-        <label class="label">Jenis Nama</label>
-        <div class="toggle-group">
-          <button type="button" class="toggle-btn" :class="{ active: form.name_type === 'text' }" @click="switchNameType('text')">
-            Teks
-          </button>
-          <button type="button" class="toggle-btn" :class="{ active: form.name_type === 'image' }" @click="switchNameType('image')">
-            Gambar
-          </button>
-        </div>
-      </div>
-
-      <!-- Name String (text) -->
-      <div v-if="form.name_type === 'text'" class="field">
         <label class="label">Nama</label>
-        <input v-model="form.name_string" type="text" class="input" placeholder="cth: Rantai tangan 916" required />
+        <input v-model="form.name_string" type="text" class="input" placeholder="cth: Rantai tangan 916" />
       </div>
 
-      <!-- Name String (image) -->
-      <div v-else class="field">
+      <!-- Image -->
+      <div class="field">
         <label class="label">Gambar</label>
-        <div class="image-upload" @click="fileInput?.click()">
-          <img v-if="form.name_string" :src="form.name_string" class="image-preview" />
-          <div v-else class="image-placeholder">
+        <div v-if="form.image_string" class="image-wrapper">
+          <img :src="form.image_string" class="image-preview" />
+          <button type="button" class="btn-remove-image" @click="form.image_string = ''">✕</button>
+        </div>
+        <div v-else class="image-upload" @click="fileInput?.click()">
+          <div class="image-placeholder">
             <span class="image-icon">📷</span>
             <span>Tekan untuk muat naik</span>
           </div>
@@ -98,16 +90,15 @@ const entry = ref<any>(null)
 const loading = ref(true)
 
 const form = reactive({
-  name_type: 'text' as 'text' | 'image',
   name_string: '',
+  image_string: '',
   is_collateral: false,
   loan_amount: null as number | null,
   gram: 0,
 })
-
-const originalNameString = ref('')
 const fileInput = ref<HTMLInputElement>()
 const submitting = ref(false)
+const showNameImageHint = ref(false)
 
 const gramShortcuts = computed(() => {
   if (entry.value?.metal_type === 'gold') {
@@ -126,24 +117,12 @@ const gramShortcuts = computed(() => {
   ]
 })
 
-const switchNameType = (type: 'text' | 'image') => {
-  if (type === form.name_type) return
-  form.name_type = type
-  // Restore original if switching back to the original type
-  if (type === entry.value.name_type) {
-    form.name_string = originalNameString.value
-  } else {
-    form.name_string = ''
-  }
-}
-
 onMounted(async () => {
   try {
     const doc = await getEntry(route.params.id as string)
     entry.value = doc
-    originalNameString.value = doc.name_string
-    form.name_type = doc.name_type
     form.name_string = doc.name_string
+    form.image_string = doc.image_string || ''
     form.is_collateral = doc.is_collateral || false
     form.loan_amount = doc.loan_amount || null
     form.gram = doc.gram
@@ -157,13 +136,18 @@ const handleImageUpload = (e: Event) => {
   if (!file) return
   const reader = new FileReader()
   reader.onload = () => {
-    form.name_string = reader.result as string
+    form.image_string = reader.result as string
   }
   reader.readAsDataURL(file)
 }
 
 const handleSubmit = async () => {
   if (!form.gram || form.gram > entry.value.gram) return
+  if (!form.name_string.trim() && !form.image_string) {
+    showNameImageHint.value = true
+    return
+  }
+  showNameImageHint.value = false
 
   submitting.value = true
   try {
@@ -171,8 +155,8 @@ const handleSubmit = async () => {
 
     await updateEntry({
       ...entry.value,
-      name_type: form.name_type,
       name_string: form.name_string,
+      image_string: form.image_string,
       is_collateral: isGold ? form.is_collateral : false,
       loan_amount: isGold && form.is_collateral ? form.loan_amount : null,
       gram: form.gram,
@@ -341,11 +325,33 @@ const handleSubmit = async () => {
   border-color: #d4a017;
 }
 
+.image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .image-preview {
   max-width: 100%;
   max-height: 200px;
   border-radius: 6px;
   object-fit: contain;
+}
+
+.btn-remove-image {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .image-placeholder {
@@ -376,5 +382,13 @@ const handleSubmit = async () => {
 .btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 8px 12px;
+  border-radius: 8px;
 }
 </style>

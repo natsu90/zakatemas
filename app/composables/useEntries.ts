@@ -4,7 +4,7 @@ interface Entry {
   metal_type: 'gold' | 'silver'
   metal_state: 'physical' | 'digital'
   name_string: string
-  name_type: 'text' | 'image'
+  image_string: string
   is_worn: boolean
   gold_percent: number | null
   is_collateral: boolean

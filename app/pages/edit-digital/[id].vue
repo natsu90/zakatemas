@@ -189,7 +189,7 @@ const handleSubmit = async () => {
         metal_type: 'gold',
         metal_state: 'physical',
         name_string: `${platform} ${denomLabel}`,
-        name_type: 'text',
+        image_string: '',
         is_worn: false,
         gold_percent: 999,
         is_collateral: false,
