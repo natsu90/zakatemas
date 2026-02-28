@@ -48,12 +48,25 @@
               <span v-if="item.entry.gold_percent">{{ item.entry.gold_percent }}</span>
               <span v-if="item.entry.gold_percent">·</span>
               <span>{{ item.entry.is_worn ? 'Barang Kemas' : 'Pelaburan' }}</span>
+              <template v-if="item.entry.is_collateral">
+                <span>·</span>
+                <span class="collateral-tag">Ar-Rahnu</span>
+              </template>
             </div>
             <div class="card-date">{{ formatDate(item.entry.date) }}</div>
           </div>
         </template>
       </li>
     </ul>
+
+    <footer v-if="displayItems.length" class="footer">
+      <div class="footer-info">
+        <span class="footer-label">Jumlah Zakat</span>
+        <span class="footer-amount">RM {{ zakatAmount.toFixed(2) }}</span>
+      </div>
+      <button v-if="hasNisab" class="btn-bayar">Bayar</button>
+      <span v-else class="footer-msg">Tidak Cukup Nisab atau Uruf</span>
+    </footer>
   </div>
 </template>
 
@@ -96,6 +109,84 @@ const displayItems = computed<DisplayItem[]>(() => {
   return items
 })
 
+const NISAB_GRAM = 85
+const URUF_GOLD_GRAM = 800
+const URUF_SILVER_GRAM = 595
+const GOLD_PRICE = 650
+const SILVER_PRICE = 12
+const ZAKAT_RATE = 0.025
+const HAUL_DAYS = 354
+
+const hasHaul = (dateStr: string) => {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  return diff >= HAUL_DAYS * 24 * 60 * 60 * 1000
+}
+
+const getAdjustedGram = (e: any) => {
+  const base = e.gold_percent && e.gold_percent !== 999
+    ? e.gram * (e.gold_percent / 1000)
+    : e.gram
+  if (e.is_collateral && e.loan_amount) {
+    const netValue = base * GOLD_PRICE - e.loan_amount
+    return netValue > 0 ? netValue / GOLD_PRICE : 0
+  }
+  return base
+}
+
+const nisabWeight = computed(() => {
+  let total = 0
+  for (const e of entries.value) {
+    if (e.metal_type !== 'gold' || !hasHaul(e.date)) continue
+    if (e.metal_state === 'digital') {
+      total += e.gram
+    } else if (!e.is_worn) {
+      total += getAdjustedGram(e)
+    }
+  }
+  return parseFloat(total.toFixed(2))
+})
+
+const urufWeight = computed(() => {
+  let total = 0
+  for (const e of entries.value) {
+    if (e.metal_type !== 'gold' || !hasHaul(e.date)) continue
+    if (e.metal_state === 'physical' && e.is_worn) {
+      total += getAdjustedGram(e)
+    }
+  }
+  return parseFloat(total.toFixed(2))
+})
+
+const silverWeight = computed(() => {
+  let total = 0
+  for (const e of entries.value) {
+    if (e.metal_type === 'silver' && e.metal_state === 'physical' && hasHaul(e.date)) {
+      total += e.gram
+    }
+  }
+  return parseFloat(total.toFixed(2))
+})
+
+const hasNisab = computed(() =>
+  nisabWeight.value >= NISAB_GRAM
+  || urufWeight.value > URUF_GOLD_GRAM
+  || silverWeight.value > URUF_SILVER_GRAM,
+)
+
+const zakatAmount = computed(() => {
+  let total = 0
+  if (nisabWeight.value >= NISAB_GRAM) {
+    total += nisabWeight.value * GOLD_PRICE
+  }
+  if (urufWeight.value > URUF_GOLD_GRAM) {
+    total += (urufWeight.value - URUF_GOLD_GRAM) * GOLD_PRICE
+  }
+  if (silverWeight.value > URUF_SILVER_GRAM) {
+    total += (silverWeight.value - URUF_SILVER_GRAM) * SILVER_PRICE
+  }
+  return parseFloat((total * ZAKAT_RATE).toFixed(2))
+})
+
 const handleDelete = async (entry: any) => {
   if (confirm('Padam rekod ini?')) {
     await deleteEntry(entry)
@@ -127,6 +218,7 @@ const formatDate = (dateStr: string) => {
   margin: 0 auto;
   padding: 16px;
   padding-top: 68px;
+  padding-bottom: 90px;
 }
 
 .header {
@@ -302,5 +394,61 @@ const formatDate = (dateStr: string) => {
 .record-gram {
   font-weight: 600;
   color: #444;
+}
+
+.collateral-tag {
+  color: #dc2626;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+}
+
+.footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.footer-label {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.footer-amount {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.btn-bayar {
+  background: #d4a017;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.footer-msg {
+  font-size: 0.75rem;
+  color: #888;
+  text-align: right;
+  max-width: 140px;
+  line-height: 1.3;
 }
 </style>
