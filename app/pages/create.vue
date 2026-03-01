@@ -121,7 +121,7 @@
 
         <div v-if="form.is_collateral" class="field">
           <label class="label">Jumlah Pinjaman + Upah (RM)</label>
-          <input v-model.number="form.loan_amount" type="number" class="input" placeholder="cth: 5000" min="0" step="0.01" required />
+          <input v-model.number="form.loan_amount" type="number" class="input" placeholder="cth: 5000" min="0" :max="(form.gram || 0) * 650" step="0.01" required />
         </div>
       </template>
 
