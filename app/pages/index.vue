@@ -62,10 +62,13 @@
     <footer v-if="displayItems.length" class="footer">
       <div class="footer-info">
         <span class="footer-label">Jumlah Zakat</span>
-        <span class="footer-amount">RM {{ zakatAmount.toFixed(2) }}</span>
+        <span v-if="hasNisab" class="footer-amount">RM {{ zakatAmount.toFixed(2) }}</span>
+        <span v-else-if="futureZakat" class="footer-amount">RM {{ futureZakat.amount.toFixed(2) }}</span>
+        <span v-else class="footer-amount">RM 0.00</span>
       </div>
       <button v-if="hasNisab" class="btn-bayar">Bayar</button>
-      <span v-else class="footer-msg">Tidak Cukup Nisab atau Uruf</span>
+      <button v-else-if="futureZakat" class="btn-bayar-future disabled">Bayar Zakat pada <br/>{{ formatDate(futureZakat.date.toISOString()) }}</button>
+      <span v-else class="btn-bayar-future disabled">Tidak Cukup Nisab atau Uruf</span>
     </footer>
   </div>
 </template>
@@ -160,7 +163,7 @@ const urufWeight = computed(() => {
 const silverWeight = computed(() => {
   let total = 0
   for (const e of entries.value) {
-    if (e.metal_type === 'silver' && e.metal_state === 'physical' && hasHaul(e.date)) {
+    if (e.metal_type === 'silver' && hasHaul(e.date)) {
       total += e.gram
     }
   }
@@ -185,6 +188,55 @@ const zakatAmount = computed(() => {
     total += (silverWeight.value - URUF_SILVER_GRAM) * SILVER_PRICE
   }
   return parseFloat((total * ZAKAT_RATE).toFixed(2))
+})
+
+const futureZakat = computed(() => {
+  if (hasNisab.value) return null
+
+  const haulMs = HAUL_DAYS * 24 * 60 * 60 * 1000
+  const now = Date.now()
+
+  // Entries that haven't reached haul yet, with their future haul date
+  const pending = entries.value
+    .filter((e) => !hasHaul(e.date))
+    .map((e) => ({
+      entry: e,
+      haulDate: new Date(new Date(e.date).getTime() + haulMs),
+    }))
+    .filter((p) => p.haulDate.getTime() > now)
+    .sort((a, b) => a.haulDate.getTime() - b.haulDate.getTime())
+
+  if (!pending.length) return null
+
+  // Start with current haul-reached totals
+  let runNisab = nisabWeight.value
+  let runUruf = urufWeight.value
+  let runSilver = silverWeight.value
+
+  for (const p of pending) {
+    const e = p.entry
+    if (e.metal_type === 'gold') {
+      if (e.metal_state === 'digital') {
+        runNisab += e.gram
+      } else if (!e.is_worn) {
+        runNisab += getAdjustedGram(e)
+      } else {
+        runUruf += getAdjustedGram(e)
+      }
+    } else if (e.metal_type === 'silver') {
+      runSilver += e.gram
+    }
+
+    if (runNisab >= NISAB_GRAM || runUruf > URUF_GOLD_GRAM || runSilver > URUF_SILVER_GRAM) {
+      let total = 0
+      if (runNisab >= NISAB_GRAM) total += runNisab * GOLD_PRICE
+      if (runUruf > URUF_GOLD_GRAM) total += (runUruf - URUF_GOLD_GRAM) * GOLD_PRICE
+      if (runSilver > URUF_SILVER_GRAM) total += (runSilver - URUF_SILVER_GRAM) * SILVER_PRICE
+      return { date: p.haulDate, amount: parseFloat((total * ZAKAT_RATE).toFixed(2)) }
+    }
+  }
+
+  return null
 })
 
 const handleDelete = async (entry: any) => {
@@ -444,11 +496,23 @@ const formatDate = (dateStr: string) => {
   cursor: pointer;
 }
 
-.footer-msg {
+.btn-bayar-future {
+  background: none;
+  border: 1px solid #d4a017;
+  color: #d4a017;
+  padding: 8px 14px;
+  border-radius: 10px;
   font-size: 0.75rem;
-  color: #888;
-  text-align: right;
-  max-width: 140px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  max-width: 160px;
   line-height: 1.3;
+}
+
+.btn-bayar-future.disabled {
+  border-color: #ccc;
+  color: #999;
+  cursor: default;
 }
 </style>
