@@ -15,7 +15,7 @@
         <!-- Grouped digital gold card -->
         <template v-if="item.type === 'digital-group'">
           <div class="card-header">
-            <span class="badge gold">Emas</span>
+            <span class="badge" :class="item.metal_type === 'gold' ? 'gold' : 'silver'">{{ item.metal_type === 'gold' ? 'Emas' : 'Perak' }}</span>
             <span class="badge digital">Digital</span>
             <span class="badge gram">{{ item.totalGram }}g</span>
             <NuxtLink :to="`/edit-digital/${item.platform}`" class="btn-edit">✎</NuxtLink>
@@ -82,7 +82,7 @@ onMounted(() => {
 
 type DisplayItem =
   | { type: 'entry'; key: string; entry: any }
-  | { type: 'digital-group'; key: string; platform: string; totalGram: number; count: number; entries: any[] }
+  | { type: 'digital-group'; key: string; platform: string; metal_type: string; totalGram: number; count: number; entries: any[] }
 
 const displayItems = computed<DisplayItem[]>(() => {
   const items: DisplayItem[] = []
@@ -103,6 +103,7 @@ const displayItems = computed<DisplayItem[]>(() => {
       type: 'digital-group',
       key: `digital-${platform}`,
       platform,
+      metal_type: group[0].metal_type,
       totalGram: parseFloat(group.reduce((sum: number, e: any) => sum + e.gram, 0).toFixed(2)),
       count: group.length,
       entries: group,
@@ -254,6 +255,8 @@ const platformNames: Record<string, string> = {
   MAYBANK: 'Maybank Islamic Gold Account-i',
   MBSB: 'MBSB Bank PrimeGold-i',
   MEEM: 'MEEM Gold GSS',
+  MEEMSILVER: 'MEEM Gold SSS',
+  PGSILVER: 'Public Gold SAP',
   PUBLICGOLD: 'Public Gold GAP',
 }
 

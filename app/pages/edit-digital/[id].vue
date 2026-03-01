@@ -2,7 +2,7 @@
   <div class="container">
     <header class="header">
       <NuxtLink to="/" class="btn-back">← Kembali</NuxtLink>
-      <h1>Kemaskini Emas Digital</h1>
+      <h1>Kemaskini {{ isSilverPlatform ? 'Perak' : 'Emas' }} Digital</h1>
     </header>
 
     <div v-if="loading" class="loading">Memuatkan...</div>
@@ -10,7 +10,7 @@
     <form v-else-if="platformEntries.length" class="form" @submit.prevent="handleSubmit">
       <!-- Info badges (read-only) -->
       <div class="info-row">
-        <span class="badge gold">Emas</span>
+        <span class="badge" :class="isSilverPlatform ? 'silver' : 'gold'">{{ isSilverPlatform ? 'Perak' : 'Emas' }}</span>
         <span class="badge digital">Digital</span>
         <span class="badge gram">{{ totalGram }}g</span>
       </div>
@@ -82,10 +82,15 @@ const platformNames: Record<string, string> = {
   MAYBANK: 'Maybank Islamic Gold Account-i',
   MBSB: 'MBSB Bank PrimeGold-i',
   MEEM: 'MEEM Gold GSS',
+  MEEMSILVER: 'MEEM Gold SSS',
+  PGSILVER: 'Public Gold SAP',
   PUBLICGOLD: 'Public Gold GAP',
 }
 
+const SILVER_PLATFORMS = ['MEEMSILVER', 'PGSILVER']
+
 const denominations = computed(() => {
+  // Gold platforms
   if (platform === 'BURSA') return [{ label: '1 dinar', value: 4.25 }]
   if (platform === 'PUBLICGOLD') return [
     { label: '1g', value: 1 },
@@ -97,6 +102,25 @@ const denominations = computed(() => {
     { label: '1 dinar', value: 4.25 },
     { label: '5 dinar', value: 21.25 },
   ]
+  // Silver platforms
+  if (platform === 'MEEMSILVER') return [
+    { label: '1 dirham', value: 2.975 },
+    { label: '5 dirham', value: 14.875 },
+    { label: '10 dirham', value: 29.75 },
+    { label: '100g', value: 100 },
+    { label: '250g', value: 250 },
+    { label: '500g', value: 500 },
+    { label: '1000g', value: 1000 },
+  ]
+  if (platform === 'PGSILVER') return [
+    { label: '5 dirham', value: 14.875 },
+    { label: '10 dirham', value: 29.75 },
+    { label: '100g', value: 100 },
+    { label: '250g', value: 250 },
+    { label: '500g', value: 500 },
+    { label: '1000g', value: 1000 },
+  ]
+  // Default gold
   return [
     { label: '1g', value: 1 },
     { label: '5g', value: 5 },
@@ -110,6 +134,7 @@ const denominations = computed(() => {
 })
 
 const platform = route.params.id as string
+const isSilverPlatform = SILVER_PLATFORMS.includes(platform)
 const loading = ref(true)
 const submitting = ref(false)
 const mode = ref<'manual' | 'convert'>('manual')
@@ -186,14 +211,15 @@ const handleSubmit = async () => {
       const denomLabel = denominations.value.find(d => d.value === denom)?.label || `${denom}g`
       const lastDate = await deductFromEntries(denom)
 
-      // Create new physical gold record
+      // Create new physical record
+      const isSilver = SILVER_PLATFORMS.includes(platform)
       await addEntry({
-        metal_type: 'gold',
+        metal_type: isSilver ? 'silver' : 'gold',
         metal_state: 'physical',
         name_string: `${platform} ${denomLabel}`,
         image_string: '',
         is_worn: false,
-        gold_percent: 999,
+        gold_percent: isSilver ? null : 999,
         is_collateral: false,
         loan_amount: null,
         is_bulk: false,
@@ -288,6 +314,11 @@ const handleSubmit = async () => {
 .badge.gold {
   background: #fef3c7;
   color: #92400e;
+}
+
+.badge.silver {
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .badge.digital {

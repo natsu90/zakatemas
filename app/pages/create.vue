@@ -13,14 +13,14 @@
           <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'gold' }" @click="form.metal_type = 'gold'">
             Emas
           </button>
-          <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'silver' }" @click="form.metal_type = 'silver'; form.metal_state = 'physical'; form.name_string = ''; form.image_string = ''">
+          <button type="button" class="toggle-btn" :class="{ active: form.metal_type === 'silver' }" @click="form.metal_type = 'silver'; form.name_string = ''; form.image_string = ''">
             Perak
           </button>
         </div>
       </div>
 
-      <!-- Metal State (gold only) -->
-      <div v-if="form.metal_type === 'gold'" class="field">
+      <!-- Metal State -->
+      <div class="field">
         <label class="label">Bentuk</label>
         <div class="toggle-group">
           <button type="button" class="toggle-btn" :class="{ active: form.metal_state === 'physical' }" @click="form.metal_state = 'physical'; form.name_string = ''; form.image_string = ''">
@@ -50,15 +50,21 @@
         <label class="label">Platform</label>
         <select v-model="form.name_string" class="input" required>
           <option value="" disabled>Pilih platform</option>
-          <option value="AGROBANK">Agrobank AGROGold Account-i</option>
-          <option value="BANKISLAM">Bank Islam Gold Account-i</option>
-          <option value="BANKRAKYAT">Bank Rakyat eGold-i</option>
-          <option value="BSN">BSN MyGold Account-i</option>
-          <option value="BURSA">Bursa Gold Dinar</option>
-          <option value="MAYBANK">Maybank Islamic Gold Account-i</option>
-          <option value="MBSB">MBSB Bank PrimeGold-i</option>
-          <option value="MEEM">MEEM Gold GSS</option>
-          <option value="PUBLICGOLD">Public Gold GAP</option>
+          <template v-if="form.metal_type === 'gold'">
+            <option value="AGROBANK">Agrobank AGROGold Account-i</option>
+            <option value="BANKISLAM">Bank Islam Gold Account-i</option>
+            <option value="BANKRAKYAT">Bank Rakyat eGold-i</option>
+            <option value="BSN">BSN MyGold Account-i</option>
+            <option value="BURSA">Bursa Gold Dinar</option>
+            <option value="MAYBANK">Maybank Islamic Gold Account-i</option>
+            <option value="MBSB">MBSB Bank PrimeGold-i</option>
+            <option value="MEEM">MEEM Gold GSS</option>
+            <option value="PUBLICGOLD">Public Gold GAP</option>
+          </template>
+          <template v-else>
+            <option value="MEEMSILVER">MEEM Gold SSS</option>
+            <option value="PGSILVER">Public Gold SAP</option>
+          </template>
         </select>
       </div>
 
