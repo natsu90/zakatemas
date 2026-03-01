@@ -75,11 +75,13 @@ const { entries, fetchEntries, updateEntry, addEntry, deleteEntry } = useEntries
 
 const platformNames: Record<string, string> = {
   AGROBANK: 'Agrobank AGROGold Account-i',
+  BANKISLAM: 'Bank Islam Gold Account-i',
   BANKRAKYAT: 'Bank Rakyat eGold-i',
   BSN: 'BSN MyGold Account-i',
   BURSA: 'Bursa Gold Dinar',
   MAYBANK: 'Maybank Islamic Gold Account-i',
   MBSB: 'MBSB Bank PrimeGold-i',
+  MEEM: 'MEEM Gold GSS',
   PUBLICGOLD: 'Public Gold GAP',
 }
 
