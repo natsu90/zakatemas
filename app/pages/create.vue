@@ -73,7 +73,7 @@
         <div v-if="showNameImageHint" class="hint">Sila isi sekurang-kurangnya nama atau gambar.</div>
         <div class="field">
           <label class="label">Nama</label>
-          <input v-model="form.name_string" type="text" class="input" placeholder="cth: Rantai tangan 916" />
+          <input v-model="form.name_string" type="text" class="input" :placeholder="form.metal_type === 'gold' && !form.is_worn ? 'cth: PG 1 dinar' : form.metal_type === 'silver' ? 'cth: PG 5 dirham' : 'cth: Rantai tangan 916'" />
         </div>
 
         <div class="field">

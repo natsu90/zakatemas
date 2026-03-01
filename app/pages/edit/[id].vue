@@ -24,7 +24,7 @@
       <!-- Name -->
       <div class="field">
         <label class="label">Nama</label>
-        <input v-model="form.name_string" type="text" class="input" placeholder="cth: Rantai tangan 916" />
+        <input v-model="form.name_string" type="text" class="input" :placeholder="entry.metal_type === 'gold' && !entry.is_worn ? 'cth: PG 1 dinar' : entry.metal_type === 'silver' ? 'cth: PG 5 dirham' : 'cth: Rantai tangan 916'" />
       </div>
 
       <!-- Image -->
