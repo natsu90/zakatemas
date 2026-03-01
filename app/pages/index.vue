@@ -71,7 +71,7 @@
         <span v-else-if="futureZakat" class="footer-amount">RM {{ futureZakat.amount.toFixed(2) }}</span>
         <span v-else class="footer-amount">RM 0.00</span>
       </div>
-      <button v-if="hasNisab" class="btn-bayar" :disabled="zakatAmount < 10">Bayar</button>
+      <button v-if="hasNisab" class="btn-bayar" :disabled="zakatAmount < 10" @click="handleBayar">Bayar</button>
       <button v-else-if="futureZakat" class="btn-bayar-future disabled">Bayar Zakat pada <br/>{{ formatDate(futureZakat.date.toISOString()) }}</button>
       <span v-else class="btn-bayar-future disabled">Tidak Cukup Nisab atau Uruf</span>
     </footer>
@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-const { entries, fetchEntries, deleteEntry } = useEntries()
+const { entries, fetchEntries, updateEntry, deleteEntry } = useEntries()
 
 onMounted(() => {
   fetchEntries()
@@ -251,6 +251,23 @@ const futureZakat = computed(() => {
 
   return null
 })
+
+const handleBayar = async () => {
+  const today = new Date().toISOString().split('T')[0]
+  const toUpdate = entries.value.filter((e) => {
+    if (!hasHaul(e.date)) return false
+    if (e.metal_type === 'gold') {
+      if (e.metal_state === 'digital') return nisabWeight.value >= NISAB_GRAM
+      if (!e.is_worn) return nisabWeight.value >= NISAB_GRAM
+      if (e.is_worn) return urufWeight.value > URUF_GOLD_GRAM
+    }
+    if (e.metal_type === 'silver') return silverWeight.value > URUF_SILVER_GRAM
+    return false
+  })
+  for (const e of toUpdate) {
+    await updateEntry({ ...e, date: today })
+  }
+}
 
 const handleDelete = async (entry: any) => {
   if (confirm('Padam rekod ini?')) {
