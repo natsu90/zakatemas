@@ -99,6 +99,7 @@ const displayItems = computed<DisplayItem[]>(() => {
   }
 
   for (const [platform, group] of digitalGroups) {
+    group.sort((a: any, b: any) => b.date.localeCompare(a.date))
     items.push({
       type: 'digital-group',
       key: `digital-${platform}`,
@@ -109,6 +110,12 @@ const displayItems = computed<DisplayItem[]>(() => {
       entries: group,
     })
   }
+
+  items.sort((a, b) => {
+    const dateA = a.type === 'entry' ? a.entry.date : a.entries[0].date
+    const dateB = b.type === 'entry' ? b.entry.date : b.entries[0].date
+    return dateB.localeCompare(dateA)
+  })
 
   return items
 })
