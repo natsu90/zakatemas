@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <header class="header">
-      <h1>Zakat Emas & Perak</h1>
+      <h1>Kalkulator Zakat Emas</h1>
       <NuxtLink to="/create" class="btn-add">+ Tambah</NuxtLink>
     </header>
 
@@ -52,7 +52,12 @@
                 <span>·</span>
                 <span class="collateral-tag">Ar-Rahnu</span>
               </template>
+              <template v-if="item.entry.is_bulk">
+                <span>·</span>
+                <span class="bulk-tag">Pukal</span>
+              </template>
             </div>
+            <div v-else-if="item.entry.is_bulk" class="card-details"><span class="bulk-tag">Pukal</span></div>
             <div class="card-date">{{ formatDate(item.entry.date) }}</div>
           </div>
         </template>
@@ -66,7 +71,7 @@
         <span v-else-if="futureZakat" class="footer-amount">RM {{ futureZakat.amount.toFixed(2) }}</span>
         <span v-else class="footer-amount">RM 0.00</span>
       </div>
-      <button v-if="hasNisab" class="btn-bayar">Bayar</button>
+      <button v-if="hasNisab" class="btn-bayar" :disabled="zakatAmount < 10">Bayar</button>
       <button v-else-if="futureZakat" class="btn-bayar-future disabled">Bayar Zakat pada <br/>{{ formatDate(futureZakat.date.toISOString()) }}</button>
       <span v-else class="btn-bayar-future disabled">Tidak Cukup Nisab atau Uruf</span>
     </footer>
@@ -462,6 +467,10 @@ const formatDate = (dateStr: string) => {
 
 .collateral-tag {
   color: #dc2626;
+}
+
+.bulk-tag {
+  color: #854d0e;
 }
 
 .footer {
