@@ -81,6 +81,10 @@
 <script setup lang="ts">
 const { entries, fetchEntries, updateEntry, deleteEntry } = useEntries()
 
+const { data: prices } = await useFetch('/api/prices', { default: () => ({ gold_price: 650, silver_price: 12 }) })
+const GOLD_PRICE = computed(() => prices.value.gold_price)
+const SILVER_PRICE = computed(() => prices.value.silver_price)
+
 onMounted(() => {
   fetchEntries()
 })
@@ -128,8 +132,6 @@ const displayItems = computed<DisplayItem[]>(() => {
 const NISAB_GRAM = 85
 const URUF_GOLD_GRAM = 800
 const URUF_SILVER_GRAM = 595
-const GOLD_PRICE = 650
-const SILVER_PRICE = 12
 const ZAKAT_RATE = 0.025
 const HAUL_DAYS = 354
 
@@ -143,8 +145,8 @@ const getAdjustedGram = (e: any) => {
     ? e.gram * (e.gold_percent / 1000)
     : e.gram
   if (e.is_collateral && e.loan_amount) {
-    const netValue = base * GOLD_PRICE - e.loan_amount
-    return netValue > 0 ? netValue / GOLD_PRICE : 0
+    const netValue = base * GOLD_PRICE.value - e.loan_amount
+    return netValue > 0 ? netValue / GOLD_PRICE.value : 0
   }
   return base
 }
@@ -192,13 +194,13 @@ const hasNisab = computed(() =>
 const zakatAmount = computed(() => {
   let total = 0
   if (nisabWeight.value >= NISAB_GRAM) {
-    total += nisabWeight.value * GOLD_PRICE
+    total += nisabWeight.value * GOLD_PRICE.value
   }
   if (urufWeight.value > URUF_GOLD_GRAM) {
-    total += (urufWeight.value - URUF_GOLD_GRAM) * GOLD_PRICE
+    total += (urufWeight.value - URUF_GOLD_GRAM) * GOLD_PRICE.value
   }
   if (silverWeight.value > URUF_SILVER_GRAM) {
-    total += (silverWeight.value - URUF_SILVER_GRAM) * SILVER_PRICE
+    total += (silverWeight.value - URUF_SILVER_GRAM) * SILVER_PRICE.value
   }
   return parseFloat((total * ZAKAT_RATE).toFixed(2))
 })
@@ -242,9 +244,9 @@ const futureZakat = computed(() => {
 
     if (runNisab >= NISAB_GRAM || runUruf > URUF_GOLD_GRAM || runSilver > URUF_SILVER_GRAM) {
       let total = 0
-      if (runNisab >= NISAB_GRAM) total += runNisab * GOLD_PRICE
-      if (runUruf > URUF_GOLD_GRAM) total += (runUruf - URUF_GOLD_GRAM) * GOLD_PRICE
-      if (runSilver > URUF_SILVER_GRAM) total += (runSilver - URUF_SILVER_GRAM) * SILVER_PRICE
+      if (runNisab >= NISAB_GRAM) total += runNisab * GOLD_PRICE.value
+      if (runUruf > URUF_GOLD_GRAM) total += (runUruf - URUF_GOLD_GRAM) * GOLD_PRICE.value
+      if (runSilver > URUF_SILVER_GRAM) total += (runSilver - URUF_SILVER_GRAM) * SILVER_PRICE.value
       return { date: p.haulDate, amount: parseFloat((total * ZAKAT_RATE).toFixed(2)) }
     }
   }
