@@ -100,8 +100,10 @@
           <select v-model.number="form.gold_percent" class="input">
             <option :value="null" disabled>Pilih ketulenan</option>
             <option :value="999">999 / 24K</option>
+            <option :value="950">950 / 23K</option>
             <option :value="916">916 / 22K</option>
-            <option :value="833">833 / 20K</option>
+            <option :value="875">875 / 21K</option>
+            <option :value="835">835 / 20K</option>
             <option :value="750">750 / 18K</option>
           </select>
         </div>
