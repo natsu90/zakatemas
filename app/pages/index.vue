@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <header class="header">
-      <h1>Kalkulator Zakat Emas</h1>
+      <h1>Kira Zakat Emas</h1>
       <NuxtLink to="/create" class="btn-add">+ Tambah</NuxtLink>
     </header>
 
@@ -73,7 +73,7 @@
       </div>
       <button v-if="hasNisab" class="btn-bayar" :disabled="zakatAmount < 10" @click="handleBayar">Bayar</button>
       <button v-else-if="futureZakat" class="btn-bayar-future disabled">Bayar Zakat pada <br/>{{ formatDate(futureZakat.date.toISOString()) }}</button>
-      <span v-else class="btn-bayar-future disabled">Tidak Cukup Nisab atau Uruf</span>
+      <span v-else class="btn-bayar-future disabled">Tidak Wajib Zakat</span>
     </footer>
   </div>
 </template>
