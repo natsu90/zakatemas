@@ -69,6 +69,8 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'Kemaskini Digital — Zakat Emas & Perak' })
+
 const route = useRoute()
 const router = useRouter()
 const { entries, fetchEntries, updateEntry, addEntry, deleteEntry } = useEntries()

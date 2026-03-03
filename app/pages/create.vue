@@ -165,6 +165,8 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'Tambah Rekod — Zakat Emas & Perak' })
+
 const router = useRouter()
 const { addEntry } = useEntries()
 

@@ -82,6 +82,8 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'Kemaskini Rekod — Zakat Emas & Perak' })
+
 const route = useRoute()
 const router = useRouter()
 const { getEntry, updateEntry } = useEntries()

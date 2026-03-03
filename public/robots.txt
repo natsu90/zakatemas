@@ -1,2 +1,4 @@
 User-Agent: *
-Disallow:
+Disallow: /edit/
+Disallow: /edit-digital/
+Disallow: /create

@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <header class="header">
-      <h1>Kira Zakat Emas</h1>
+      <h1>Kira Zakat Emas <span class="h1-sub">& Perak</span></h1>
       <NuxtLink to="/create" class="btn-add">+ Tambah</NuxtLink>
     </header>
 
@@ -79,6 +79,8 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'Kalkulator Zakat Emas & Perak' })
+
 const { entries, fetchEntries, updateEntry, deleteEntry } = useEntries()
 
 const { data: prices } = await useFetch('/api/prices', { default: () => ({ gold_price: 650, silver_price: 12 }) })
@@ -327,6 +329,10 @@ const formatDate = (dateStr: string) => {
 .header h1 {
   font-size: 1.4rem;
   margin: 0;
+}
+
+.h1-sub {
+  font-size: 0.85rem;
 }
 
 .btn-add {
