@@ -37,7 +37,7 @@ if (isNaN(goldPrice) || isNaN(silverPrice)) {
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const filePath = resolve(__dirname, '..', 'data.json')
+const filePath = resolve(__dirname, '..', 'public', 'data.json')
 
 const output = {
   gold_price: goldPrice,

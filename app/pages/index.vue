@@ -83,7 +83,7 @@ useHead({ title: 'Kalkulator Zakat Emas & Perak' })
 
 const { entries, fetchEntries, updateEntry, deleteEntry } = useEntries()
 
-const { data: prices } = await useFetch('/api/prices', { default: () => ({ gold_price: 650, silver_price: 12 }) })
+const { data: prices } = await useFetch('/data.json', { default: () => ({ gold_price: 650, silver_price: 12 }) })
 const GOLD_PRICE = computed(() => prices.value.gold_price)
 const SILVER_PRICE = computed(() => prices.value.silver_price)
 

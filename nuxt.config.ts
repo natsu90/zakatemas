@@ -1,7 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: ['@vite-pwa/nuxt'],
+  ssr: false,
   app: {
+    baseURL: '/',
     head: {
       htmlAttrs: { lang: 'ms' },
       title: 'Kalkulator Zakat Emas & Perak',

@@ -88,7 +88,7 @@ const route = useRoute()
 const router = useRouter()
 const { getEntry, updateEntry } = useEntries()
 
-const { data: prices } = await useFetch('/api/prices', { default: () => ({ gold_price: 650, silver_price: 12 }) })
+const { data: prices } = await useFetch('/data.json', { default: () => ({ gold_price: 650, silver_price: 12 }) })
 const goldPrice = computed(() => prices.value.gold_price)
 
 const entry = ref<any>(null)
