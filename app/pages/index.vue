@@ -83,11 +83,11 @@
     </ul>
 
     <!-- State selection modal -->
-    <div v-if="showStateModal" class="modal-overlay" @click.self="selectedState && (showStateModal = false)">
+    <div v-if="showStateModal" class="modal-overlay" @click.self="selectedState && (showStateModal = false, modalState = selectedState)">
       <div class="modal-card">
         <h2 class="modal-title">Pilih Negeri</h2>
         <p class="modal-subtitle">Kadar uruf emas berbeza mengikut negeri</p>
-        <select v-model="selectedState" class="modal-select">
+        <select v-model="modalState" class="modal-select">
           <option value="" disabled>-- Pilih negeri --</option>
           <option v-for="s in STATE_URUF" :key="s.label" :value="s.label">{{ s.label }} — {{ s.value }}g</option>
         </select>
@@ -102,13 +102,13 @@
           </div>
           <div class="modal-price-updated">Dikemaskini {{ formatDateTime(prices.updated_at) }}</div>
         </div>
-        <button class="btn-save" :disabled="!selectedState" @click="saveState">Simpan</button>
+        <button class="btn-save" :disabled="!modalState" @click="saveState">Simpan</button>
         <p class="modal-credit">Dibina oleh <a href="https://sulai.mn/" target="_blank" rel="noopener">Sulaiman Sudirman</a></p>
       </div>
     </div>
 
     <!-- Floating info button -->
-    <button class="btn-info" @click="showStateModal = true">i</button>
+    <button class="btn-info" @click="modalState = selectedState; showStateModal = true">i</button>
 
     <footer v-if="displayItems.length" class="footer">
       <div class="footer-info">
@@ -200,6 +200,7 @@ const STATE_URUF = [
 ]
 
 const selectedState = ref('')
+const modalState = ref('')
 const showStateModal = ref(false)
 
 const NISAB_GRAM = 85
@@ -399,8 +400,9 @@ const platformNames: Record<string, string> = {
 }
 
 const saveState = () => {
-  if (!selectedState.value) return
-  localStorage.setItem('selectedState', selectedState.value)
+  if (!modalState.value) return
+  selectedState.value = modalState.value
+  localStorage.setItem('selectedState', modalState.value)
   showStateModal.value = false
 }
 
