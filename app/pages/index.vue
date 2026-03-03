@@ -5,6 +5,24 @@
       <NuxtLink to="/create" class="btn-add">+ Tambah</NuxtLink>
     </header>
 
+    <div v-if="entries.length" class="summary">
+      <div v-if="summaryInvest.gram" class="summary-row">
+        <span class="summary-label">Emas Pelaburan</span>
+        <span class="summary-gram">{{ summaryInvest.gram }}g</span>
+        <span class="summary-worth">RM {{ summaryInvest.worth.toFixed(2) }}</span>
+      </div>
+      <div v-if="summaryWorn.gram" class="summary-row">
+        <span class="summary-label">Barang Kemas</span>
+        <span class="summary-gram">{{ summaryWorn.gram }}g</span>
+        <span class="summary-worth">RM {{ summaryWorn.worth.toFixed(2) }}</span>
+      </div>
+      <div v-if="summarySilver.gram" class="summary-row">
+        <span class="summary-label">Perak</span>
+        <span class="summary-gram">{{ summarySilver.gram }}g</span>
+        <span class="summary-worth">RM {{ summarySilver.worth.toFixed(2) }}</span>
+      </div>
+    </div>
+
     <div v-if="displayItems.length === 0" class="empty">
       <p>Tiada rekod lagi.</p>
       <NuxtLink to="/create" class="btn-primary">Tambah Rekod Pertama</NuxtLink>
@@ -243,6 +261,37 @@ const silverWeight = computed(() => {
   return parseFloat(total.toFixed(2))
 })
 
+const summaryInvest = computed(() => {
+  let gram = 0
+  for (const e of entries.value) {
+    if (e.metal_type !== 'gold') continue
+    if (e.metal_state === 'digital') gram += e.gram
+    else if (!e.is_worn) gram += getAdjustedGram(e)
+  }
+  gram = parseFloat(gram.toFixed(2))
+  return { gram, worth: gram * GOLD_PRICE.value }
+})
+
+const summaryWorn = computed(() => {
+  let gram = 0
+  for (const e of entries.value) {
+    if (e.metal_type === 'gold' && e.metal_state === 'physical' && e.is_worn) {
+      gram += getAdjustedGram(e)
+    }
+  }
+  gram = parseFloat(gram.toFixed(2))
+  return { gram, worth: gram * GOLD_PRICE.value }
+})
+
+const summarySilver = computed(() => {
+  let gram = 0
+  for (const e of entries.value) {
+    if (e.metal_type === 'silver') gram += e.gram
+  }
+  gram = parseFloat(gram.toFixed(2))
+  return { gram, worth: gram * SILVER_PRICE.value }
+})
+
 const hasNisab = computed(() =>
   nisabWeight.value >= NISAB_GRAM
   || urufWeight.value > URUF_GOLD_GRAM.value
@@ -415,6 +464,43 @@ const formatDateTime = (dateStr: string) => {
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
+}
+
+.summary {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.summary-label {
+  color: #666;
+  flex: 1;
+}
+
+.summary-gram {
+  font-weight: 600;
+  color: #444;
+  margin-right: 12px;
+  min-width: 60px;
+  text-align: right;
+}
+
+.summary-worth {
+  font-weight: 600;
+  color: #222;
+  min-width: 100px;
+  text-align: right;
 }
 
 .empty {
