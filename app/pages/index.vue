@@ -64,6 +64,34 @@
       </li>
     </ul>
 
+    <!-- State selection modal -->
+    <div v-if="showStateModal" class="modal-overlay" @click.self="selectedState && (showStateModal = false)">
+      <div class="modal-card">
+        <h2 class="modal-title">Pilih Negeri</h2>
+        <p class="modal-subtitle">Kadar uruf emas berbeza mengikut negeri</p>
+        <select v-model="selectedState" class="modal-select">
+          <option value="" disabled>-- Pilih negeri --</option>
+          <option v-for="s in STATE_URUF" :key="s.label" :value="s.label">{{ s.label }} — {{ s.value }}g</option>
+        </select>
+        <div class="modal-prices">
+          <div class="modal-price-row">
+            <span>Emas 999</span>
+            <span class="modal-price-value">RM {{ GOLD_PRICE.toFixed(2) }}/g</span>
+          </div>
+          <div class="modal-price-row">
+            <span>Perak</span>
+            <span class="modal-price-value">RM {{ SILVER_PRICE.toFixed(2) }}/g</span>
+          </div>
+          <div class="modal-price-updated">Dikemaskini {{ formatDateTime(prices.updated_at) }}</div>
+        </div>
+        <button class="btn-save" :disabled="!selectedState" @click="saveState">Simpan</button>
+        <p class="modal-credit">Dibina oleh <a href="https://sulai.mn/" target="_blank" rel="noopener">Sulaiman Sudirman</a></p>
+      </div>
+    </div>
+
+    <!-- Floating info button -->
+    <button class="btn-info" @click="showStateModal = true">i</button>
+
     <footer v-if="displayItems.length" class="footer">
       <div class="footer-info">
         <span class="footer-label">Jumlah Zakat</span>
@@ -89,6 +117,12 @@ const SILVER_PRICE = computed(() => prices.value.silver_price)
 
 onMounted(() => {
   fetchEntries()
+  const saved = localStorage.getItem('selectedState')
+  if (saved) {
+    selectedState.value = saved
+  } else {
+    showStateModal.value = true
+  }
 })
 
 type DisplayItem =
@@ -131,8 +165,30 @@ const displayItems = computed<DisplayItem[]>(() => {
   return items
 })
 
+const STATE_URUF = [
+  { label: 'Terengganu', value: 850 },
+  { label: 'Wilayah Persekutuan & Selangor', value: 800 },
+  { label: 'Kelantan', value: 600 },
+  { label: 'Perak', value: 500 },
+  { label: 'Pahang', value: 500 },
+  { label: 'Johor', value: 425 },
+  { label: 'Pulau Pinang', value: 250 },
+  { label: 'Negeri Sembilan', value: 200 },
+  { label: 'Kedah', value: 200 },
+  { label: 'Melaka', value: 180 },
+  { label: 'Sabah', value: 152 },
+  { label: 'Sarawak', value: 90 },
+  { label: 'Perlis', value: 85 },
+]
+
+const selectedState = ref('')
+const showStateModal = ref(false)
+
 const NISAB_GRAM = 85
-const URUF_GOLD_GRAM = 800
+const URUF_GOLD_GRAM = computed(() => {
+  const found = STATE_URUF.find((s) => s.label === selectedState.value)
+  return found ? found.value : 800
+})
 const URUF_SILVER_GRAM = 595
 const ZAKAT_RATE = 0.025
 const HAUL_DAYS = 354
@@ -189,7 +245,7 @@ const silverWeight = computed(() => {
 
 const hasNisab = computed(() =>
   nisabWeight.value >= NISAB_GRAM
-  || urufWeight.value > URUF_GOLD_GRAM
+  || urufWeight.value > URUF_GOLD_GRAM.value
   || silverWeight.value > URUF_SILVER_GRAM,
 )
 
@@ -198,8 +254,8 @@ const zakatAmount = computed(() => {
   if (nisabWeight.value >= NISAB_GRAM) {
     total += nisabWeight.value * GOLD_PRICE.value
   }
-  if (urufWeight.value > URUF_GOLD_GRAM) {
-    total += (urufWeight.value - URUF_GOLD_GRAM) * GOLD_PRICE.value
+  if (urufWeight.value > URUF_GOLD_GRAM.value) {
+    total += (urufWeight.value - URUF_GOLD_GRAM.value) * GOLD_PRICE.value
   }
   if (silverWeight.value > URUF_SILVER_GRAM) {
     total += (silverWeight.value - URUF_SILVER_GRAM) * SILVER_PRICE.value
@@ -244,10 +300,10 @@ const futureZakat = computed(() => {
       runSilver += e.gram
     }
 
-    if (runNisab >= NISAB_GRAM || runUruf > URUF_GOLD_GRAM || runSilver > URUF_SILVER_GRAM) {
+    if (runNisab >= NISAB_GRAM || runUruf > URUF_GOLD_GRAM.value || runSilver > URUF_SILVER_GRAM) {
       let total = 0
       if (runNisab >= NISAB_GRAM) total += runNisab * GOLD_PRICE.value
-      if (runUruf > URUF_GOLD_GRAM) total += (runUruf - URUF_GOLD_GRAM) * GOLD_PRICE.value
+      if (runUruf > URUF_GOLD_GRAM.value) total += (runUruf - URUF_GOLD_GRAM.value) * GOLD_PRICE.value
       if (runSilver > URUF_SILVER_GRAM) total += (runSilver - URUF_SILVER_GRAM) * SILVER_PRICE.value
       return { date: p.haulDate, amount: parseFloat((total * ZAKAT_RATE).toFixed(2)) }
     }
@@ -263,7 +319,7 @@ const handleBayar = async () => {
     if (e.metal_type === 'gold') {
       if (e.metal_state === 'digital') return nisabWeight.value >= NISAB_GRAM
       if (!e.is_worn) return nisabWeight.value >= NISAB_GRAM
-      if (e.is_worn) return urufWeight.value > URUF_GOLD_GRAM
+      if (e.is_worn) return urufWeight.value > URUF_GOLD_GRAM.value
     }
     if (e.metal_type === 'silver') return silverWeight.value > URUF_SILVER_GRAM
     return false
@@ -293,11 +349,27 @@ const platformNames: Record<string, string> = {
   PUBLICGOLD: 'Public Gold GAP',
 }
 
+const saveState = () => {
+  if (!selectedState.value) return
+  localStorage.setItem('selectedState', selectedState.value)
+  showStateModal.value = false
+}
+
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString('ms-MY', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+  })
+}
+
+const formatDateTime = (dateStr: string) => {
+  return new Date(dateStr).toLocaleString('ms-MY', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   })
 }
 </script>
@@ -560,5 +632,115 @@ const formatDate = (dateStr: string) => {
   border-color: #ccc;
   color: #999;
   cursor: default;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px;
+  max-width: 360px;
+  width: calc(100% - 32px);
+  text-align: center;
+}
+
+.modal-title {
+  font-size: 1.3rem;
+  margin: 0 0 4px;
+}
+
+.modal-subtitle {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0 0 20px;
+}
+
+.modal-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  appearance: auto;
+}
+
+.btn-save {
+  width: 100%;
+  background: #d4a017;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.modal-prices {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+
+.modal-price-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 2px 0;
+}
+
+.modal-price-value {
+  font-weight: 600;
+}
+
+.modal-price-updated {
+  font-size: 0.7rem;
+  color: #aaa;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.modal-credit {
+  font-size: 0.7rem;
+  color: #aaa;
+  margin: 16px 0 0;
+}
+
+.modal-credit a {
+  color: #999;
+}
+
+.btn-info {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #d4a017;
+  color: #fff;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  font-style: italic;
+  cursor: pointer;
+  z-index: 10;
+  font-family: serif;
 }
 </style>
