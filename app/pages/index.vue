@@ -107,6 +107,17 @@
       </div>
     </div>
 
+    <!-- Bayar modal -->
+    <div v-if="showBayarModal" class="modal-overlay" @click.self="showBayarModal = false">
+      <div class="modal-card">
+        <h2 class="modal-title">Bayar Zakat</h2>
+        <p class="modal-bayar-text">Sila bayar di pautan berikut</p>
+        <a href="https://fpx.zakatselangor.com.my/" target="_blank" rel="noopener" class="btn-bayar-link">fpx.zakatselangor.com.my</a>
+        <p class="modal-bayar-text">Kemudian klik butang di bawah selepas bayaran berjaya.</p>
+        <button class="btn-save" @click="handleBayar">Selesai Bayaran</button>
+      </div>
+    </div>
+
     <!-- Floating info button -->
     <button class="btn-info" @click="modalState = selectedState; showStateModal = true">i</button>
 
@@ -117,7 +128,7 @@
         <span v-else-if="futureZakat" class="footer-amount">RM {{ futureZakat.amount.toFixed(2) }}</span>
         <span v-else class="footer-amount">RM 0.00</span>
       </div>
-      <button v-if="hasNisab" class="btn-bayar" :disabled="zakatAmount < 10" @click="handleBayar">Bayar</button>
+      <button v-if="hasNisab" class="btn-bayar" :disabled="zakatAmount < 10" @click="showBayarModal = true">Bayar</button>
       <button v-else-if="futureZakat" class="btn-bayar-future disabled">Bayar Zakat pada <br/>{{ formatDate(futureZakat.date.toISOString()) }}</button>
       <span v-else class="btn-bayar-future disabled">Tidak Wajib Zakat</span>
     </footer>
@@ -202,6 +213,7 @@ const STATE_URUF = [
 const selectedState = ref('')
 const modalState = ref('')
 const showStateModal = ref(false)
+const showBayarModal = ref(false)
 
 const NISAB_GRAM = 85
 const URUF_GOLD_GRAM = computed(() => {
@@ -377,6 +389,7 @@ const handleBayar = async () => {
   for (const e of toUpdate) {
     await updateEntry({ ...e, date: today })
   }
+  showBayarModal.value = false
 }
 
 const handleDelete = async (entry: any) => {
@@ -802,6 +815,24 @@ const formatDateTime = (dateStr: string) => {
   color: #aaa;
   margin-top: 4px;
   text-align: right;
+}
+
+.modal-bayar-text {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 12px 0 0;
+}
+
+.btn-bayar-link {
+  display: inline-block;
+  margin: 12px 0;
+  padding: 10px 20px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  color: #d4a017;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
 }
 
 .modal-credit {
