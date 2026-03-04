@@ -198,7 +198,7 @@ const displayItems = computed<DisplayItem[]>(() => {
       key: `digital-${platform}`,
       platform,
       metal_type: group[0].metal_type,
-      totalGram: parseFloat(group.reduce((sum: number, e: any) => sum + e.gram, 0).toFixed(2)),
+      totalGram: parseFloat(group.reduce((sum: number, e: any) => sum + e.gram, 0).toFixed(3)),
       count: group.length,
       entries: group,
     })

@@ -40,7 +40,7 @@
       <!-- Jual: deduction input -->
       <div v-if="mode === 'manual'" class="field">
         <label class="label">Jumlah tolak (gram) — maks {{ totalGram }}g</label>
-        <input v-model.number="deductGram" type="number" class="input" :max="totalGram" min="0.01" step="0.01" required />
+        <input v-model.number="deductGram" type="number" class="input" :max="totalGram" min="0.001" step="0.001" required />
       </div>
 
       <!-- Convert: denomination grid -->
@@ -151,7 +151,7 @@ const platformEntries = computed(() =>
 )
 
 const totalGram = computed(() =>
-  parseFloat(platformEntries.value.reduce((sum, e) => sum + e.gram, 0).toFixed(2)),
+  parseFloat(platformEntries.value.reduce((sum, e) => sum + e.gram, 0).toFixed(3)),
 )
 
 const canSubmit = computed(() => {
@@ -188,10 +188,10 @@ const deductFromEntries = async (amount: number): Promise<string> => {
     lastDeductedDate = entry.date
 
     if (entry.gram <= remaining) {
-      remaining = parseFloat((remaining - entry.gram).toFixed(2))
+      remaining = parseFloat((remaining - entry.gram).toFixed(3))
       await deleteEntry(entry)
     } else {
-      const newGram = parseFloat((entry.gram - remaining).toFixed(2))
+      const newGram = parseFloat((entry.gram - remaining).toFixed(3))
       remaining = 0
       await updateEntry({ ...entry, gram: newGram })
     }
