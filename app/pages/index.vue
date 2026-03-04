@@ -104,6 +104,7 @@
         </div>
         <button class="btn-save" :disabled="!modalState" @click="saveState">Simpan</button>
         <p class="modal-credit">Dibina oleh <a href="https://sulai.mn/" target="_blank" rel="noopener">Sulaiman Sudirman</a></p>
+        <p class="modal-credit">Maklumbalas: <a href="mailto:contact@zakatemas.app">contact@zakatemas.app</a></p>
       </div>
     </div>
 
@@ -111,8 +112,26 @@
     <div v-if="showBayarModal" class="modal-overlay" @click.self="showBayarModal = false">
       <div class="modal-card">
         <h2 class="modal-title">Bayar Zakat</h2>
-        <p class="modal-bayar-text">Sila bayar di pautan berikut</p>
-        <a href="https://fpx.zakatselangor.com.my/" target="_blank" rel="noopener" class="btn-bayar-link">fpx.zakatselangor.com.my</a>
+        <p class="modal-bayar-text">Sila bayar di pautan berikut dengan maklumat di bawah:</p>
+        <div class="modal-bayar-info">
+          <div v-if="nisabWeight >= NISAB_GRAM || urufWeight > URUF_GOLD_GRAM" class="modal-bayar-row">
+            <span>Jenis Zakat</span>
+            <span class="modal-bayar-value">ZAKAT EMAS</span>
+          </div>
+          <div v-else class="modal-bayar-row">
+            <span>Jenis Zakat</span>
+            <span class="modal-bayar-value">ZAKAT PERAK</span>
+          </div>
+          <div class="modal-bayar-row">
+            <span>Haul / Tahun</span>
+            <span class="modal-bayar-value">{{ new Date().getFullYear() }}</span>
+          </div>
+          <div class="modal-bayar-row">
+            <span>Jumlah Bayaran (RM)</span>
+            <span class="modal-bayar-value">{{ zakatAmount.toFixed(2) }}</span>
+          </div>
+        </div>
+        <a href="https://fpx.zakatselangor.com.my/" target="_blank" rel="noopener" class="btn-bayar-link">Bayar di Zakat Selangor</a>
         <p class="modal-bayar-text">Kemudian klik butang di bawah selepas bayaran berjaya.</p>
         <button class="btn-save" @click="handleBayar">Selesai Bayaran</button>
       </div>
@@ -128,7 +147,7 @@
         <span v-else-if="futureZakat" class="footer-amount">RM {{ futureZakat.amount.toFixed(2) }}</span>
         <span v-else class="footer-amount">RM 0.00</span>
       </div>
-      <button v-if="hasNisab" class="btn-bayar" :disabled="zakatAmount < 10" @click="showBayarModal = true">Bayar</button>
+      <button v-if="hasNisab" class="btn-bayar" @click="showBayarModal = true">Bayar</button>
       <button v-else-if="futureZakat" class="btn-bayar-future disabled">Bayar Zakat pada <br/>{{ formatDate(futureZakat.date.toISOString()) }}</button>
       <span v-else class="btn-bayar-future disabled">Tidak Wajib Zakat</span>
     </footer>
@@ -820,7 +839,26 @@ const formatDateTime = (dateStr: string) => {
 .modal-bayar-text {
   font-size: 0.9rem;
   color: #555;
-  margin: 12px 0 0;
+  margin: 12px 0 12px;
+}
+
+.modal-bayar-info {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 12px 0;
+  text-align: left;
+}
+
+.modal-bayar-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 3px 0;
+}
+
+.modal-bayar-value {
+  font-weight: 600;
 }
 
 .btn-bayar-link {
@@ -839,6 +877,10 @@ const formatDateTime = (dateStr: string) => {
   font-size: 0.7rem;
   color: #aaa;
   margin: 16px 0 0;
+}
+
+.modal-credit + .modal-credit {
+  margin-top: 4px;
 }
 
 .modal-credit a {
