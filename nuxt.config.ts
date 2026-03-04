@@ -22,6 +22,7 @@ export default defineNuxtConfig({
         { name: 'twitter:title', content: 'Kalkulator Zakat Emas & Perak' },
         { name: 'twitter:description', content: 'Kalkulator zakat emas dan perak mengikut kadar semasa.' },
         { name: 'twitter:image', content: '/pwa-512x512.png' },
+        { name: 'apple-mobile-web-app-title', content: 'ZakatEmas' },
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
@@ -40,7 +41,7 @@ export default defineNuxtConfig({
     registerType: 'autoUpdate',
     manifest: {
       name: 'Kalkulator Zakat Emas & Perak',
-      short_name: 'Zakat Emas',
+      short_name: 'ZakatEmas',
       description: 'Kalkulator zakat emas dan perak mengikut kadar semasa',
       theme_color: '#d4a017',
       background_color: '#fafafa',
