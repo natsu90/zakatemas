@@ -148,7 +148,7 @@
             {{ s.label }}
           </button>
         </div>
-        <input v-model.number="form.gram" type="number" class="input" placeholder="cth: 10.5" min="0" :step="form.metal_state === 'digital' ? '0.001' : '0.01'" required />
+        <input v-model.number="form.gram" type="number" class="input" placeholder="cth: 10.5" min="0" step="0.001" required />
       </div>
 
       <!-- Date -->

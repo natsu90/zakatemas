@@ -71,7 +71,7 @@
             {{ s.label }}
           </button>
         </div>
-        <input v-model.number="form.gram" type="number" class="input" :max="entry.gram" min="0.01" step="0.01" required :disabled="!entry.is_bulk || form.is_collateral || entry.is_collateral" />
+        <input v-model.number="form.gram" type="number" class="input" :max="entry.gram" min="0.001" step="0.001" required :disabled="!entry.is_bulk || form.is_collateral || entry.is_collateral" />
       </div>
 
       <button type="submit" class="btn-submit" :disabled="submitting">

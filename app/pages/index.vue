@@ -269,7 +269,7 @@ const nisabWeight = computed(() => {
       total += getAdjustedGram(e)
     }
   }
-  return parseFloat(total.toFixed(2))
+  return parseFloat(total.toFixed(3))
 })
 
 const urufWeight = computed(() => {
@@ -280,7 +280,7 @@ const urufWeight = computed(() => {
       total += getAdjustedGram(e)
     }
   }
-  return parseFloat(total.toFixed(2))
+  return parseFloat(total.toFixed(3))
 })
 
 const silverWeight = computed(() => {
@@ -290,7 +290,7 @@ const silverWeight = computed(() => {
       total += e.gram
     }
   }
-  return parseFloat(total.toFixed(2))
+  return parseFloat(total.toFixed(3))
 })
 
 const summaryInvest = computed(() => {
@@ -300,7 +300,7 @@ const summaryInvest = computed(() => {
     if (e.metal_state === 'digital') gram += e.gram
     else if (!e.is_worn) gram += getAdjustedGram(e)
   }
-  gram = parseFloat(gram.toFixed(2))
+  gram = parseFloat(gram.toFixed(3))
   return { gram, worth: gram * GOLD_PRICE.value }
 })
 
@@ -311,7 +311,7 @@ const summaryWorn = computed(() => {
       gram += getAdjustedGram(e)
     }
   }
-  gram = parseFloat(gram.toFixed(2))
+  gram = parseFloat(gram.toFixed(3))
   return { gram, worth: gram * GOLD_PRICE.value }
 })
 
@@ -320,7 +320,7 @@ const summarySilver = computed(() => {
   for (const e of entries.value) {
     if (e.metal_type === 'silver') gram += e.gram
   }
-  gram = parseFloat(gram.toFixed(2))
+  gram = parseFloat(gram.toFixed(3))
   return { gram, worth: gram * SILVER_PRICE.value }
 })
 
