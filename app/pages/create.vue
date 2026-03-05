@@ -168,7 +168,9 @@
 useHead({ title: 'Tambah Rekod — Zakat Emas & Perak' })
 
 const router = useRouter()
-const { addEntry } = useEntries()
+const { entries, fetchEntries, addEntry, updateEntry } = useEntries()
+
+await fetchEntries()
 
 const { data: prices } = await useFetch('/data.json', { default: () => ({ gold_price: 650, silver_price: 12 }) })
 const goldPrice = computed(() => prices.value.gold_price)
@@ -230,6 +232,17 @@ const handleSubmit = async () => {
 
   submitting.value = true
   try {
+    if (form.metal_state === 'digital') {
+      const existing = entries.value.find(
+        (e: any) => e.metal_state === 'digital' && e.metal_type === form.metal_type && e.name_string === form.name_string && e.date === form.date,
+      )
+      if (existing) {
+        await updateEntry({ ...existing, gram: parseFloat(((existing as any).gram + form.gram!).toFixed(3)) })
+        router.push('/')
+        return
+      }
+    }
+
     await addEntry({
       metal_type: form.metal_type,
       metal_state: form.metal_state,
