@@ -139,11 +139,23 @@ onMounted(async () => {
 const handleImageUpload = (e: Event) => {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => {
-    form.image_string = reader.result as string
+  const img = new Image()
+  img.onload = () => {
+    const MAX = 800
+    let w = img.width
+    let h = img.height
+    if (w > MAX || h > MAX) {
+      if (w > h) { h = Math.round(h * MAX / w); w = MAX }
+      else { w = Math.round(w * MAX / h); h = MAX }
+    }
+    const canvas = document.createElement('canvas')
+    canvas.width = w
+    canvas.height = h
+    canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
+    form.image_string = canvas.toDataURL('image/jpeg', 0.8)
+    URL.revokeObjectURL(img.src)
   }
-  reader.readAsDataURL(file)
+  img.src = URL.createObjectURL(file)
 }
 
 const handleSubmit = async () => {
