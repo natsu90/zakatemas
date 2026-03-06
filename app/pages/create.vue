@@ -87,8 +87,8 @@
               <span class="image-icon">📷</span>
               <span>Tekan untuk muat naik</span>
             </div>
-            <input ref="fileInput" type="file" accept="image/*" hidden @change="handleImageUpload" />
           </div>
+          <input ref="fileInput" type="file" accept="image/*" hidden @change="handleImageUpload" />
         </div>
       </template>
 
@@ -215,23 +215,26 @@ const gramShortcuts = computed(() => {
 const handleImageUpload = (e: Event) => {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
-  const img = new Image()
-  img.onload = () => {
-    const MAX = 800
-    let w = img.width
-    let h = img.height
-    if (w > MAX || h > MAX) {
-      if (w > h) { h = Math.round(h * MAX / w); w = MAX }
-      else { w = Math.round(w * MAX / h); h = MAX }
+  const reader = new FileReader()
+  reader.onload = () => {
+    const img = new Image()
+    img.onload = () => {
+      const MAX = 800
+      let w = img.width
+      let h = img.height
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX }
+        else { w = Math.round(w * MAX / h); h = MAX }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
+      form.image_string = canvas.toDataURL('image/jpeg', 0.8)
     }
-    const canvas = document.createElement('canvas')
-    canvas.width = w
-    canvas.height = h
-    canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
-    form.image_string = canvas.toDataURL('image/jpeg', 0.8)
-    URL.revokeObjectURL(img.src)
+    img.src = reader.result as string
   }
-  img.src = URL.createObjectURL(file)
+  reader.readAsDataURL(file)
 }
 
 const handleSubmit = async () => {
