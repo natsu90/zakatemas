@@ -89,7 +89,7 @@
         <p class="modal-subtitle">Kadar uruf emas berbeza mengikut negeri</p>
         <select v-model="modalState" class="modal-select">
           <option value="" disabled>-- Pilih negeri --</option>
-          <option v-for="s in STATE_URUF" :key="s.label" :value="s.label">{{ s.label }} — {{ s.value }}g</option>
+          <option v-for="s in STATE_URUF" :key="s.label" :value="s.label">{{ s.label }} — {{ s.label === 'Perlis' ? 'Tiada Uruf, Ikut Nisab 85g' : s.value + 'g' }}</option>
         </select>
         <div class="modal-prices">
           <div class="modal-price-row">
@@ -235,7 +235,9 @@ const showStateModal = ref(false)
 const showBayarModal = ref(false)
 
 const NISAB_GRAM = 85
+const isPerlis = computed(() => selectedState.value === 'Perlis')
 const URUF_GOLD_GRAM = computed(() => {
+  if (isPerlis.value) return 0
   const found = STATE_URUF.find((s) => s.label === selectedState.value)
   return found ? found.value : 800
 })
@@ -265,7 +267,7 @@ const nisabWeight = computed(() => {
     if (e.metal_type !== 'gold' || !hasHaul(e.date)) continue
     if (e.metal_state === 'digital') {
       total += e.gram
-    } else if (!e.is_worn) {
+    } else if (!e.is_worn || isPerlis.value) {
       total += getAdjustedGram(e)
     }
   }
@@ -273,6 +275,7 @@ const nisabWeight = computed(() => {
 })
 
 const urufWeight = computed(() => {
+  if (isPerlis.value) return 0
   let total = 0
   for (const e of entries.value) {
     if (e.metal_type !== 'gold' || !hasHaul(e.date)) continue
@@ -372,7 +375,7 @@ const futureZakat = computed(() => {
     if (e.metal_type === 'gold') {
       if (e.metal_state === 'digital') {
         runNisab += e.gram
-      } else if (!e.is_worn) {
+      } else if (!e.is_worn || isPerlis.value) {
         runNisab += getAdjustedGram(e)
       } else {
         runUruf += getAdjustedGram(e)
@@ -399,7 +402,7 @@ const handleBayar = async () => {
     if (!hasHaul(e.date)) return false
     if (e.metal_type === 'gold') {
       if (e.metal_state === 'digital') return nisabWeight.value >= NISAB_GRAM
-      if (!e.is_worn) return nisabWeight.value >= NISAB_GRAM
+      if (!e.is_worn || isPerlis.value) return nisabWeight.value >= NISAB_GRAM
       if (e.is_worn) return urufWeight.value > URUF_GOLD_GRAM.value
     }
     if (e.metal_type === 'silver') return silverWeight.value > URUF_SILVER_GRAM
