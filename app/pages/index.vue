@@ -36,17 +36,22 @@
             <span class="badge" :class="item.metal_type === 'gold' ? 'gold' : 'silver'">{{ item.metal_type === 'gold' ? 'Emas' : 'Perak' }}</span>
             <span class="badge digital">Digital</span>
             <span class="badge gram">{{ item.totalGram }}g</span>
-            <span class="collapse-chevron">{{ collapsedGroups.has(item.key) ? '▸' : '▾' }}</span>
             <NuxtLink :to="`/edit-digital/${item.platform}`" class="btn-edit" @click.stop>✎</NuxtLink>
+            <span class="btn-collapse">{{ expandedGroups.has(item.key) ? '▼' : '▶' }}</span>
           </div>
-          <div v-if="!collapsedGroups.has(item.key)" class="card-body">
+          <div class="card-body">
             <div class="card-name">{{ platformNames[item.platform] || item.platform }}</div>
-            <div class="records-summary">
-              <div v-for="e in item.entries" :key="e._id" class="record-row">
-                <span class="record-date">{{ formatDate(e.date) }}</span>
-                <span class="record-gram">{{ e.gram }}g</span>
+            <template v-if="expandedGroups.has(item.key)">
+              <div class="records-summary">
+                <div v-for="e in item.entries" :key="e._id" class="record-row">
+                  <span class="record-date">{{ formatDate(e.date) }}</span>
+                  <span class="record-gram">{{ e.gram }}g</span>
+                </div>
               </div>
-            </div>
+            </template>
+            <template v-else>
+              <div class="card-date">{{ formatDate(item.entries[item.entries.length - 1].date) }}</div>
+            </template>
           </div>
         </template>
         <!-- Individual entry card -->
@@ -234,12 +239,12 @@ const selectedState = ref('')
 const modalState = ref('')
 const showStateModal = ref(false)
 const showBayarModal = ref(false)
-const collapsedGroups = ref(new Set<string>())
+const expandedGroups = ref(new Set<string>())
 
 const toggleGroup = (key: string) => {
-  const next = new Set(collapsedGroups.value)
+  const next = new Set(expandedGroups.value)
   next.has(key) ? next.delete(key) : next.add(key)
-  collapsedGroups.value = next
+  expandedGroups.value = next
 }
 
 const NISAB_GRAM = 85
@@ -676,10 +681,14 @@ const formatDateTime = (dateStr: string) => {
   user-select: none;
 }
 
-.collapse-chevron {
-  margin-left: auto;
-  font-size: 0.75rem;
+.btn-collapse {
   color: #aaa;
+  font-size: 1rem;
+  padding: 2px 6px;
+}
+
+.btn-edit + .btn-collapse {
+  margin-left: 0;
 }
 
 .records-summary {
