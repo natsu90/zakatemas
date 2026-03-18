@@ -50,7 +50,7 @@
               </div>
             </template>
             <template v-else>
-              <div class="card-date">{{ formatDate(item.entries[item.entries.length - 1].date) }}</div>
+              <div class="card-date">{{ formatDate(item.entries[0].date) }}</div>
             </template>
           </div>
         </template>
