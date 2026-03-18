@@ -32,13 +32,14 @@
       <li v-for="item in displayItems" :key="item.key" class="card">
         <!-- Grouped digital gold card -->
         <template v-if="item.type === 'digital-group'">
-          <div class="card-header">
+          <div class="card-header card-header-toggle" @click="toggleGroup(item.key)">
             <span class="badge" :class="item.metal_type === 'gold' ? 'gold' : 'silver'">{{ item.metal_type === 'gold' ? 'Emas' : 'Perak' }}</span>
             <span class="badge digital">Digital</span>
             <span class="badge gram">{{ item.totalGram }}g</span>
-            <NuxtLink :to="`/edit-digital/${item.platform}`" class="btn-edit">✎</NuxtLink>
+            <span class="collapse-chevron">{{ collapsedGroups.has(item.key) ? '▸' : '▾' }}</span>
+            <NuxtLink :to="`/edit-digital/${item.platform}`" class="btn-edit" @click.stop>✎</NuxtLink>
           </div>
-          <div class="card-body">
+          <div v-if="!collapsedGroups.has(item.key)" class="card-body">
             <div class="card-name">{{ platformNames[item.platform] || item.platform }}</div>
             <div class="records-summary">
               <div v-for="e in item.entries" :key="e._id" class="record-row">
@@ -233,6 +234,13 @@ const selectedState = ref('')
 const modalState = ref('')
 const showStateModal = ref(false)
 const showBayarModal = ref(false)
+const collapsedGroups = ref(new Set<string>())
+
+const toggleGroup = (key: string) => {
+  const next = new Set(collapsedGroups.value)
+  next.has(key) ? next.delete(key) : next.add(key)
+  collapsedGroups.value = next
+}
 
 const NISAB_GRAM = 85
 const isPerlis = computed(() => selectedState.value === 'Perlis')
@@ -661,6 +669,17 @@ const formatDateTime = (dateStr: string) => {
   font-size: 0.75rem;
   color: #999;
   margin-top: 6px;
+}
+
+.card-header-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.collapse-chevron {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #aaa;
 }
 
 .records-summary {
