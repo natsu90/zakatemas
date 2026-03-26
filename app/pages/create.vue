@@ -148,7 +148,7 @@
             {{ s.label }}
           </button>
         </div>
-        <input v-model.number="form.gram" type="number" class="input" placeholder="cth: 10.5" min="0" step="0.001" required />
+        <input v-model.number="form.gram" type="number" class="input" placeholder="cth: 10.5" min="0" :step="form.metal_type === 'gold' ? '0.0001' : '0.001'" required />
       </div>
 
       <!-- Date -->
@@ -252,7 +252,7 @@ const handleSubmit = async () => {
         (e: any) => e.metal_state === 'digital' && e.metal_type === form.metal_type && e.name_string === form.name_string && e.date === form.date,
       )
       if (existing) {
-        await updateEntry({ ...existing, gram: parseFloat(((existing as any).gram + form.gram!).toFixed(3)) })
+        await updateEntry({ ...existing, gram: parseFloat(((existing as any).gram + form.gram!).toFixed(form.metal_type === 'gold' ? 4 : 3)) })
         router.push('/')
         return
       }

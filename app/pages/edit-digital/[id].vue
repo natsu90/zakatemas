@@ -40,7 +40,7 @@
       <!-- Jual: deduction input -->
       <div v-if="mode === 'manual'" class="field">
         <label class="label">Jumlah tolak (gram) — maks {{ totalGram }}g</label>
-        <input v-model.number="deductGram" type="number" class="input" :max="totalGram" min="0.001" step="0.001" required />
+        <input v-model.number="deductGram" type="number" class="input" :max="totalGram" :min="isSilverPlatform ? '0.001' : '0.0001'" :step="isSilverPlatform ? '0.001' : '0.0001'" required />
       </div>
 
       <!-- Convert: denomination grid -->
