@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <header class="header">
+    <header class="page-header">
       <NuxtLink to="/" class="btn-back">← Kembali</NuxtLink>
-      <h1>Kemaskini Rekod</h1>
+      <h1 class="page-title">Kemaskini Rekod</h1>
     </header>
 
     <div v-if="loading" class="loading">Memuatkan...</div>
@@ -189,226 +189,19 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.container {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 16px;
-}
-
-.header {
+.page-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 28px;
+  padding-top: 8px;
 }
 
-.header h1 {
-  font-size: 1.2rem;
+.page-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 600;
   margin: 0;
-}
-
-.btn-back {
-  color: #666;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-.loading {
-  text-align: center;
-  padding: 48px 16px;
-  color: #888;
-}
-
-.info-row {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.badge {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.badge.gold {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.badge.silver {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.badge.physical {
-  background: #ecfdf5;
-  color: #065f46;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #444;
-}
-
-.input {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.input:focus {
-  border-color: #d4a017;
-}
-
-.toggle-group {
-  display: flex;
-  gap: 8px;
-}
-
-.toggle-btn {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #666;
-}
-
-.toggle-btn.active {
-  background: #d4a017;
-  border-color: #d4a017;
-  color: #fff;
-  font-weight: 600;
-}
-
-.shortcut-row {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.shortcut-btn {
-  padding: 6px 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 0.8rem;
-  cursor: pointer;
-  color: #555;
-  transition: all 0.2s;
-}
-
-.shortcut-btn:active {
-  background: #d4a017;
-  border-color: #d4a017;
-  color: #fff;
-}
-
-.shortcut-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.image-upload {
-  border: 2px dashed #ddd;
-  border-radius: 8px;
-  padding: 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-
-.image-upload:active {
-  border-color: #d4a017;
-}
-
-.image-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.image-preview {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 6px;
-  object-fit: contain;
-}
-
-.btn-remove-image {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 0.75rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.image-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: #999;
-  font-size: 0.85rem;
-}
-
-.image-icon {
-  font-size: 1.5rem;
-}
-
-.btn-submit {
-  margin-top: 8px;
-  padding: 14px;
-  background: #d4a017;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.hint {
-  font-size: 0.8rem;
-  color: #dc2626;
-  background: #fef2f2;
-  padding: 8px 12px;
-  border-radius: 8px;
+  color: var(--t1);
 }
 </style>

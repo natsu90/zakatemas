@@ -48,7 +48,7 @@ export default defineNuxtConfig({
       short_name: 'ZakatEmas',
       description: 'Kalkulator zakat emas dan perak mengikut kadar semasa',
       theme_color: '#d4a017',
-      background_color: '#fafafa',
+      background_color: '#0d0b08',
       lang: 'ms',
       icons: [
         { src: '/pwa-64x64.png', sizes: '64x64', type: 'image/png' },

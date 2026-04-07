@@ -1,11 +1,15 @@
 <template>
   <div class="container">
     <header class="header">
-      <h1>Kira Zakat Emas <span class="h1-sub">& Perak</span></h1>
+      <div class="header-brand">
+        <div class="header-eyebrow">Kira Zakat</div>
+        <h1>Emas <span class="h1-amp">&</span> Perak</h1>
+      </div>
       <NuxtLink to="/create" class="btn-add">+ Tambah</NuxtLink>
     </header>
 
     <div v-if="entries.length" class="summary">
+      <div class="summary-heading">Portfolio Semasa</div>
       <div v-if="summaryInvest.gram" class="summary-row">
         <span class="summary-label">Emas Pelaburan</span>
         <span class="summary-gram">{{ summaryInvest.gram }}g</span>
@@ -24,25 +28,32 @@
     </div>
 
     <div v-if="displayItems.length === 0" class="empty">
+      <div class="empty-glyph">◈</div>
       <p>Tiada rekod lagi.</p>
       <NuxtLink to="/create" class="btn-primary">Tambah Rekod Pertama</NuxtLink>
     </div>
 
     <ul v-else class="list">
       <li v-for="item in displayItems" :key="item.key" class="card">
-        <!-- Grouped digital gold card -->
+        <!-- Grouped digital card -->
         <template v-if="item.type === 'digital-group'">
           <div class="card-header card-header-toggle" @click="toggleGroup(item.key)">
             <span class="badge" :class="item.metal_type === 'gold' ? 'gold' : 'silver'">{{ item.metal_type === 'gold' ? 'Emas' : 'Perak' }}</span>
             <span class="badge digital">Digital</span>
             <span class="badge gram">{{ item.totalGram }}g</span>
             <NuxtLink :to="`/edit-digital/${item.platform}`" class="btn-edit" @click.stop>✎</NuxtLink>
-            <span class="btn-collapse">{{ expandedGroups.has(item.key) ? '▼' : '▶' }}</span>
+            <span class="btn-collapse" :class="{ expanded: expandedGroups.has(item.key) }">
+              <svg width="15" height="13" viewBox="0 0 15 13" fill="none" aria-hidden="true">
+                <line x1="1" y1="1.5"  x2="14" y2="1.5"  stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <line x1="1" y1="6.5"  x2="14" y2="6.5"  stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <line x1="1" y1="11.5" x2="14" y2="11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </span>
           </div>
           <div class="card-body">
             <div class="card-name">{{ platformNames[item.platform] || item.platform }}</div>
             <template v-if="expandedGroups.has(item.key)">
-              <div class="records-summary">
+              <div class="records-summary card-records">
                 <div v-for="e in item.entries" :key="e._id" class="record-row">
                   <span class="record-date">{{ formatDate(e.date) }}</span>
                   <span class="record-gram">{{ e.gram }}g</span>
@@ -54,6 +65,7 @@
             </template>
           </div>
         </template>
+
         <!-- Individual entry card -->
         <template v-else>
           <div class="card-header">
@@ -70,30 +82,33 @@
             <img v-if="item.entry.image_string" :src="item.entry.image_string" class="card-image" />
             <div v-if="item.entry.metal_type === 'gold'" class="card-details">
               <span v-if="item.entry.gold_percent">{{ item.entry.gold_percent }}</span>
-              <span v-if="item.entry.gold_percent">·</span>
+              <span v-if="item.entry.gold_percent" class="card-dot">·</span>
               <span>{{ item.entry.is_worn ? 'Barang Kemas' : 'Pelaburan' }}</span>
               <template v-if="item.entry.is_collateral">
-                <span>·</span>
+                <span class="card-dot">·</span>
                 <span class="collateral-tag">Ar-Rahnu</span>
               </template>
               <template v-if="item.entry.is_bulk">
-                <span>·</span>
+                <span class="card-dot">·</span>
                 <span class="bulk-tag">Pukal</span>
               </template>
             </div>
-            <div v-else-if="item.entry.is_bulk" class="card-details"><span class="bulk-tag">Pukal</span></div>
+            <div v-else-if="item.entry.is_bulk" class="card-details">
+              <span class="bulk-tag">Pukal</span>
+            </div>
             <div class="card-date">{{ formatDate(item.entry.date) }}</div>
           </div>
         </template>
       </li>
     </ul>
 
-    <!-- State selection modal -->
+    <!-- State modal -->
     <div v-if="showStateModal" class="modal-overlay" @click.self="selectedState && (showStateModal = false, modalState = selectedState)">
       <div class="modal-card">
+        <div class="modal-icon">◈</div>
         <h2 class="modal-title">Pilih Negeri</h2>
         <p class="modal-subtitle">Kadar uruf emas berbeza mengikut negeri</p>
-        <select v-model="modalState" class="modal-select">
+        <select v-model="modalState" class="input modal-select">
           <option value="" disabled>-- Pilih negeri --</option>
           <option v-for="s in STATE_URUF" :key="s.label" :value="s.label">{{ s.label }} — {{ s.label === 'Perlis' ? 'Tiada Uruf, Ikut Nisab 85g' : s.value + 'g' }}</option>
         </select>
@@ -108,7 +123,7 @@
           </div>
           <div class="modal-price-updated">Dikemaskini {{ formatDateTime(prices.updated_at) }}</div>
         </div>
-        <button class="btn-save" :disabled="!modalState" @click="saveState">Simpan</button>
+        <button class="btn-submit" :disabled="!modalState" @click="saveState">Simpan</button>
         <p class="modal-credit">Dibina oleh <a href="https://sulai.mn/" target="_blank" rel="noopener">Sulaiman Sudirman</a></p>
         <p class="modal-credit">Maklumbalas: <a href="mailto:contact@zakatemas.app">contact@zakatemas.app</a></p>
       </div>
@@ -118,7 +133,7 @@
     <div v-if="showBayarModal" class="modal-overlay" @click.self="showBayarModal = false">
       <div class="modal-card">
         <h2 class="modal-title">Bayar Zakat</h2>
-        <p class="modal-bayar-text">Sila bayar di pautan berikut dengan maklumat di bawah:</p>
+        <p class="modal-subtitle">Sila bayar di pautan berikut dengan maklumat di bawah:</p>
         <div class="modal-bayar-info">
           <div v-if="nisabWeight >= NISAB_GRAM || urufWeight > URUF_GOLD_GRAM" class="modal-bayar-row">
             <span>Jenis Zakat</span>
@@ -134,12 +149,12 @@
           </div>
           <div class="modal-bayar-row">
             <span>Jumlah Bayaran (RM)</span>
-            <span class="modal-bayar-value">{{ zakatAmount.toFixed(2) }}</span>
+            <span class="modal-bayar-value modal-bayar-amount">{{ zakatAmount.toFixed(2) }}</span>
           </div>
         </div>
-        <a href="https://fpx.zakatselangor.com.my/" target="_blank" rel="noopener" class="btn-bayar-link">Bayar di Zakat Selangor</a>
-        <p class="modal-bayar-text">Kemudian klik butang di bawah selepas bayaran berjaya.</p>
-        <button class="btn-save" @click="handleBayar">Selesai Bayaran</button>
+        <a href="https://fpx.zakatselangor.com.my/" target="_blank" rel="noopener" class="btn-bayar-link">Bayar di Zakat Selangor ↗</a>
+        <p class="modal-subtitle" style="margin-top: 12px;">Kemudian klik butang di bawah selepas bayaran berjaya.</p>
+        <button class="btn-submit" @click="handleBayar">Selesai Bayaran</button>
       </div>
     </div>
 
@@ -154,8 +169,8 @@
         <span v-else class="footer-amount">RM 0.00</span>
       </div>
       <button v-if="hasNisab" class="btn-bayar" @click="showBayarModal = true">Bayar</button>
-      <button v-else-if="futureZakat" class="btn-bayar-future disabled">Bayar Zakat pada <br/>{{ formatDate(futureZakat.date.toISOString()) }}</button>
-      <span v-else class="btn-bayar-future disabled">Tidak Wajib Zakat</span>
+      <button v-else-if="futureZakat" class="btn-bayar-future">Bayar pada<br/>{{ formatDate(futureZakat.date.toISOString()) }}</button>
+      <span v-else class="footer-status">Tidak Wajib</span>
     </footer>
   </div>
 </template>
@@ -366,7 +381,6 @@ const futureZakat = computed(() => {
   const haulMs = HAUL_DAYS * 24 * 60 * 60 * 1000
   const now = Date.now()
 
-  // Entries that haven't reached haul yet, with their future haul date
   const pending = entries.value
     .filter((e) => !hasHaul(e.date))
     .map((e) => ({
@@ -378,7 +392,6 @@ const futureZakat = computed(() => {
 
   if (!pending.length) return null
 
-  // Start with current haul-reached totals
   let runNisab = nisabWeight.value
   let runUruf = urufWeight.value
   let runSilver = silverWeight.value
@@ -475,13 +488,11 @@ const formatDateTime = (dateStr: string) => {
 
 <style scoped>
 .container {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 16px;
-  padding-top: 68px;
-  padding-bottom: 90px;
+  padding-top: 72px;
+  padding-bottom: 88px;
 }
 
+/* ── Header ── */
 .header {
   position: fixed;
   top: 0;
@@ -494,37 +505,78 @@ const formatDateTime = (dateStr: string) => {
   max-width: 480px;
   margin: 0 auto;
   padding: 12px 16px;
-  background: #fafafa;
+  background: rgba(13, 11, 8, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.header-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.header-eyebrow {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-bottom: 2px;
 }
 
 .header h1 {
-  font-size: 1.4rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 600;
   margin: 0;
+  line-height: 1;
+  color: var(--t1);
 }
 
-.h1-sub {
-  font-size: 0.85rem;
+.h1-amp {
+  font-style: italic;
+  color: var(--gold);
 }
 
 .btn-add {
-  background: #d4a017;
-  color: #fff;
+  background: var(--gold);
+  color: #0d0b08;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.2px;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-add:hover {
+  background: var(--gold-bright);
 }
 
+/* ── Summary ── */
 .summary {
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-bottom: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  margin-bottom: 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+}
+
+.summary-heading {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
 .summary-row {
@@ -534,146 +586,87 @@ const formatDateTime = (dateStr: string) => {
 }
 
 .summary-label {
-  color: #666;
+  color: var(--t2);
   flex: 1;
 }
 
 .summary-gram {
-  font-weight: 600;
-  color: #444;
+  font-weight: 500;
+  color: var(--t2);
   margin-right: 12px;
-  min-width: 60px;
+  min-width: 56px;
   text-align: right;
+  font-size: 0.82rem;
 }
 
 .summary-worth {
   font-weight: 600;
-  color: #222;
-  min-width: 100px;
+  color: var(--t1);
+  min-width: 96px;
   text-align: right;
+  font-size: 0.88rem;
 }
 
+/* ── Empty State ── */
 .empty {
   text-align: center;
-  padding: 48px 16px;
-  color: #888;
+  padding: 52px 16px;
+  color: var(--t2);
+}
+
+.empty-glyph {
+  font-size: 2.5rem;
+  color: var(--t3);
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.empty p {
+  margin: 0 0 16px;
+  font-size: 0.9rem;
 }
 
 .btn-primary {
   display: inline-block;
-  margin-top: 12px;
-  background: #d4a017;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 8px;
+  background: var(--gold);
+  color: #0d0b08;
+  padding: 10px 22px;
+  border-radius: var(--r-sm);
   text-decoration: none;
   font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+.btn-primary:hover {
+  background: var(--gold-bright);
 }
 
+/* ── Entry List ── */
 .list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .card {
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-md);
   padding: 14px;
+  transition: border-color 0.15s;
+}
+.card:hover {
+  border-color: var(--border);
 }
 
 .card-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.badge {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.badge.gold {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.badge.silver {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.badge.physical {
-  background: #ecfdf5;
-  color: #065f46;
-}
-
-.badge.digital {
-  background: #eff6ff;
-  color: #1e40af;
-}
-
-.badge.gram {
-  background: #f3f4f6;
-  color: #374151;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.btn-edit {
-  margin-left: auto;
-  color: #aaa;
-  font-size: 1rem;
-  text-decoration: none;
-  padding: 2px 6px;
-}
-
-.btn-delete {
-  margin-left: auto;
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 2px 6px;
-}
-
-.btn-edit + .btn-delete {
-  margin-left: 0;
-}
-
-.card-image {
-  max-width: 100%;
-  max-height: 120px;
-  border-radius: 6px;
-  object-fit: contain;
-  margin-bottom: 4px;
-}
-
-.card-name {
-  font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 4px;
-}
-
-.card-details {
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.card-date {
-  font-size: 0.75rem;
-  color: #999;
-  margin-top: 6px;
+  gap: 5px;
+  margin-bottom: 10px;
 }
 
 .card-header-toggle {
@@ -681,46 +674,111 @@ const formatDateTime = (dateStr: string) => {
   user-select: none;
 }
 
-.btn-collapse {
-  color: #aaa;
-  font-size: 1rem;
-  padding: 2px 6px;
+.btn-edit {
+  margin-left: auto;
+  color: var(--t3);
+  font-size: 0.95rem;
+  text-decoration: none;
+  padding: 3px 7px;
+  border-radius: 5px;
+  transition: color 0.15s, background 0.15s;
+}
+.btn-edit:hover {
+  color: var(--t1);
+  background: var(--border-dim);
 }
 
-.btn-edit + .btn-collapse {
+.btn-delete {
+  background: none;
+  border: none;
+  color: var(--t3);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 3px 7px;
+  border-radius: 5px;
+  transition: color 0.15s, background 0.15s;
+}
+.btn-delete:hover {
+  color: var(--red);
+  background: var(--red-a);
+}
+
+.btn-edit + .btn-delete {
   margin-left: 0;
 }
 
-.records-summary {
-  margin-top: 6px;
+.btn-collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t2);
+  padding: 4px 7px;
+  border-radius: 5px;
+  transition: color 0.15s, background 0.15s;
+}
+.btn-collapse:hover {
+  color: var(--t1);
+  background: var(--border-dim);
+}
+.btn-collapse.expanded {
+  color: var(--gold);
+}
+
+.card-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
-.record-row {
-  display: flex;
-  justify-content: space-between;
+.card-name {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--t1);
+}
+
+.card-image {
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 6px;
+  object-fit: contain;
+  border: 1px solid var(--border-dim);
+  margin: 4px 0;
+}
+
+.card-details {
   font-size: 0.8rem;
+  color: var(--t2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
 }
 
-.record-date {
-  color: #999;
+.card-dot {
+  color: var(--t3);
 }
 
-.record-gram {
-  font-weight: 600;
-  color: #444;
+.card-date {
+  font-size: 0.72rem;
+  color: var(--t3);
+  margin-top: 2px;
+}
+
+.card-records {
+  margin-top: 8px;
 }
 
 .collateral-tag {
-  color: #dc2626;
+  color: var(--red);
+  font-weight: 500;
 }
 
 .bulk-tag {
-  color: #854d0e;
+  color: #c8a35a;
+  font-weight: 500;
 }
 
+/* ── Footer ── */
 .footer {
   position: fixed;
   bottom: 0;
@@ -729,8 +787,10 @@ const formatDateTime = (dateStr: string) => {
   max-width: 480px;
   margin: 0 auto;
   padding: 12px 16px;
-  background: #fff;
-  border-top: 1px solid #e5e5e5;
+  background: rgba(13, 11, 8, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -744,195 +804,205 @@ const formatDateTime = (dateStr: string) => {
 }
 
 .footer-label {
-  font-size: 0.75rem;
-  color: #888;
+  font-size: 0.68rem;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .footer-amount {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #222;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--t1);
+  line-height: 1.1;
 }
 
 .btn-bayar {
-  background: #d4a017;
-  color: #fff;
+  background: var(--gold);
+  color: #0d0b08;
   border: none;
-  padding: 12px 28px;
-  border-radius: 10px;
-  font-size: 1rem;
+  padding: 11px 24px;
+  border-radius: var(--r-md);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 4px 16px rgba(212, 160, 23, 0.28);
+  transition: background 0.15s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-bayar:hover {
+  background: var(--gold-bright);
+  transform: translateY(-1px);
 }
 
 .btn-bayar-future {
-  background: none;
-  border: 1px solid #d4a017;
-  color: #d4a017;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-  max-width: 160px;
-  line-height: 1.3;
-}
-
-.btn-bayar-future.disabled {
-  border-color: #ccc;
-  color: #999;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--gold);
+  padding: 7px 12px;
+  border-radius: var(--r-sm);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
   cursor: default;
-}
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.modal-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 28px 24px;
-  max-width: 360px;
-  width: calc(100% - 32px);
   text-align: center;
+  max-width: 140px;
+  line-height: 1.4;
+}
+
+.footer-status {
+  font-size: 0.78rem;
+  color: var(--t3);
+  padding: 7px 12px;
+}
+
+/* ── Floating Info Button ── */
+.btn-info {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--gold);
+  font-size: 1rem;
+  font-weight: 700;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-info:hover {
+  background: var(--card-hover);
+  border-color: var(--gold-a2);
+}
+
+/* ── Modal Content ── */
+.modal-icon {
+  font-size: 1.8rem;
+  color: var(--gold);
+  margin-bottom: 8px;
+  opacity: 0.8;
 }
 
 .modal-title {
-  font-size: 1.3rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 600;
   margin: 0 0 4px;
+  color: var(--t1);
 }
 
 .modal-subtitle {
-  font-size: 0.85rem;
-  color: #888;
-  margin: 0 0 20px;
+  font-size: 0.82rem;
+  color: var(--t2);
+  margin: 0 0 18px;
 }
 
 .modal-select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  margin-bottom: 16px;
-  appearance: auto;
-}
-
-.btn-save {
-  width: 100%;
-  background: #d4a017;
-  color: #fff;
-  border: none;
-  padding: 12px;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-save:disabled {
-  opacity: 0.5;
-  cursor: default;
+  margin-bottom: 14px;
+  text-align: left;
 }
 
 .modal-prices {
-  background: #f9f9f9;
-  border-radius: 8px;
-  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
   margin-bottom: 16px;
+  text-align: left;
 }
 
 .modal-price-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
-  padding: 2px 0;
+  font-size: 0.84rem;
+  color: var(--t2);
+  padding: 3px 0;
 }
 
 .modal-price-value {
   font-weight: 600;
+  color: var(--t1);
 }
 
 .modal-price-updated {
-  font-size: 0.7rem;
-  color: #aaa;
-  margin-top: 4px;
+  font-size: 0.68rem;
+  color: var(--t3);
+  margin-top: 6px;
   text-align: right;
 }
 
-.modal-bayar-text {
-  font-size: 0.9rem;
-  color: #555;
-  margin: 12px 0 12px;
-}
-
 .modal-bayar-info {
-  background: #f9f9f9;
-  border-radius: 8px;
-  padding: 10px 12px;
-  margin: 12px 0;
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  margin: 14px 0;
   text-align: left;
 }
 
 .modal-bayar-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
-  padding: 3px 0;
+  font-size: 0.84rem;
+  color: var(--t2);
+  padding: 4px 0;
+}
+
+.modal-bayar-row + .modal-bayar-row {
+  border-top: 1px solid var(--border-dim);
+  margin-top: 2px;
+  padding-top: 6px;
 }
 
 .modal-bayar-value {
   font-weight: 600;
+  color: var(--t1);
+}
+
+.modal-bayar-amount {
+  color: var(--gold-bright);
+  font-size: 0.95rem;
 }
 
 .btn-bayar-link {
-  display: inline-block;
-  margin: 12px 0;
-  padding: 10px 20px;
-  background: #f0f0f0;
-  border-radius: 8px;
-  color: #d4a017;
+  display: block;
+  margin: 14px 0 4px;
+  padding: 11px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--gold-bright);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-bayar-link:hover {
+  background: var(--gold-a);
+  border-color: var(--border);
 }
 
 .modal-credit {
-  font-size: 0.7rem;
-  color: #aaa;
-  margin: 16px 0 0;
+  font-size: 0.68rem;
+  color: var(--t3);
+  margin: 14px 0 0;
 }
-
 .modal-credit + .modal-credit {
-  margin-top: 4px;
+  margin-top: 3px;
 }
-
 .modal-credit a {
-  color: #999;
+  color: var(--t2);
+  text-decoration: none;
 }
-
-.btn-info {
-  position: fixed;
-  bottom: 80px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #d4a017;
-  color: #fff;
-  border: none;
-  font-size: 1rem;
-  font-weight: 700;
-  font-style: italic;
-  cursor: pointer;
-  z-index: 10;
-  font-family: serif;
+.modal-credit a:hover {
+  color: var(--t1);
 }
 </style>

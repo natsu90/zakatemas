@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <header class="header">
+    <header class="page-header">
       <NuxtLink to="/" class="btn-back">← Kembali</NuxtLink>
-      <h1>Kemaskini {{ isSilverPlatform ? 'Perak' : 'Emas' }} Digital</h1>
+      <h1 class="page-title">Kemaskini {{ isSilverPlatform ? 'Perak' : 'Emas' }} Digital</h1>
     </header>
 
     <div v-if="loading" class="loading">Memuatkan...</div>
@@ -237,159 +237,30 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.container {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 16px;
-}
-
-.header {
+.page-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 28px;
+  padding-top: 8px;
 }
 
-.header h1 {
-  font-size: 1.2rem;
+.page-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 600;
   margin: 0;
-}
-
-.btn-back {
-  color: #666;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-.loading {
-  text-align: center;
-  padding: 48px 16px;
-  color: #888;
-}
-
-.info-row {
-  display: flex;
-  gap: 6px;
+  color: var(--t1);
 }
 
 .platform-name {
-  font-weight: 600;
-  font-size: 1rem;
-  margin-top: 6px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--t1);
+  margin-top: 4px;
 }
 
-.records-summary {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.record-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  color: #666;
-}
-
-.record-date {
-  color: #888;
-}
-
-.record-gram {
-  font-weight: 600;
-  color: #444;
-}
-
-.badge {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.badge.gold {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.badge.silver {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.badge.digital {
-  background: #eff6ff;
-  color: #1e40af;
-}
-
-.badge.gram {
-  background: #f3f4f6;
-  color: #374151;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #444;
-}
-
-.input {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.input:focus {
-  border-color: #d4a017;
-}
-
-.toggle-group {
-  display: flex;
-  gap: 8px;
-}
-
-.toggle-btn {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #666;
-}
-
-.toggle-btn.active {
-  background: #d4a017;
-  border-color: #d4a017;
-  color: #fff;
-  font-weight: 600;
-}
-
+/* ── Denomination Grid ── */
 .denom-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -397,42 +268,31 @@ const handleSubmit = async () => {
 }
 
 .denom-btn {
-  padding: 12px 8px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.9rem;
+  padding: 12px 6px;
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-sm);
+  color: var(--t2);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem;
   cursor: pointer;
-  transition: all 0.2s;
-  color: #444;
+  transition: all 0.15s ease;
+  text-align: center;
 }
-
+.denom-btn:hover {
+  border-color: var(--border);
+  color: var(--t1);
+  background: var(--card);
+}
 .denom-btn.active {
-  background: #d4a017;
-  border-color: #d4a017;
-  color: #fff;
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #0d0b08;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(212, 160, 23, 0.28);
 }
-
 .denom-btn.disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.btn-submit {
-  margin-top: 8px;
-  padding: 14px;
-  background: #d4a017;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
+  opacity: 0.2;
   cursor: not-allowed;
 }
 </style>
