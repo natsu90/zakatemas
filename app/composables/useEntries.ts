@@ -46,5 +46,17 @@ export const useEntries = () => {
     await fetchEntries()
   }
 
-  return { entries, fetchEntries, addEntry, getEntry, updateEntry, deleteEntry }
+  const bulkImport = async (importedEntries: Omit<Entry, '_rev'>[]) => {
+    const db = getDb()
+    // Delete all existing docs
+    const all = await db.allDocs({ include_docs: true })
+    const deletions = all.rows.map((row: any) => ({ _id: row.doc._id, _rev: row.doc._rev, _deleted: true }))
+    if (deletions.length) await db.bulkDocs(deletions)
+    // Insert imported entries (strip _rev to treat as new docs)
+    const insertions = importedEntries.map(({ _rev, ...e }: any) => e)
+    await db.bulkDocs(insertions)
+    await fetchEntries()
+  }
+
+  return { entries, fetchEntries, addEntry, getEntry, updateEntry, deleteEntry, bulkImport }
 }

@@ -158,8 +158,40 @@
       </div>
     </div>
 
+    <!-- Floating share button -->
+    <button class="btn-share" @click="openShareModal">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+        <path d="M7.5 1.5V9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        <path d="M4.5 4.5L7.5 1.5L10.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2.5 8.5V12.5H12.5V8.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
     <!-- Floating info button -->
     <button class="btn-info" @click="modalState = selectedState; showStateModal = true">i</button>
+
+    <!-- Share modal -->
+    <div v-if="showShareModal" class="modal-overlay" @click.self="showShareModal = false">
+      <div class="modal-card">
+        <h2 class="modal-title">Kongsi Data</h2>
+        <p class="modal-subtitle">Salin pautan untuk import data ke peranti lain. Imej tidak disertakan.</p>
+        <div v-if="shareLoading" class="share-loading">
+          <div class="share-spinner"></div>
+          <span>Menjana pautan…</span>
+        </div>
+        <template v-else-if="shareUrl">
+          <div class="share-url-box">
+            <span class="share-url-text">{{ shareUrl }}</span>
+          </div>
+          <button class="btn-submit" :class="{ copied: shareCopied }" @click="copyShareUrl">
+            {{ shareCopied ? '✓ Disalin!' : 'Salin Pautan' }}
+          </button>
+        </template>
+        <template v-else>
+          <p class="share-empty">Tiada rekod untuk dikongsi.</p>
+        </template>
+      </div>
+    </div>
 
     <footer v-if="displayItems.length" class="footer">
       <div class="footer-info">
@@ -483,6 +515,50 @@ const formatDateTime = (dateStr: string) => {
     hour: 'numeric',
     minute: '2-digit',
   })
+}
+
+// ── Share ──────────────────────────────────────────────────────────────────
+const showShareModal = ref(false)
+const shareUrl = ref('')
+const shareLoading = ref(false)
+const shareCopied = ref(false)
+
+const openShareModal = async () => {
+  showShareModal.value = true
+  shareLoading.value = true
+  shareUrl.value = ''
+  shareCopied.value = false
+
+  if (!entries.value.length) {
+    shareLoading.value = false
+    return
+  }
+
+  try {
+    const lib = await import('json-url')
+    const codec = (lib.default || lib)('lzma')
+    // Strip PouchDB internals and large image blobs to keep URL manageable
+    const data = entries.value.map(({ _rev, image_string, ...e }: any) => e)
+    const compressed = await codec.compress(data)
+    // Use the current page URL as the app root (works on localhost, custom domain, and GitHub Pages subdirs)
+    const appRoot = window.location.href.split('?')[0].split('#')[0].replace(/\/+$/, '')
+    shareUrl.value = `${appRoot}/share/${compressed}`
+  } catch (e) {
+    console.error(e)
+  } finally {
+    shareLoading.value = false
+  }
+}
+
+const copyShareUrl = async () => {
+  if (!shareUrl.value) return
+  try {
+    await navigator.clipboard.writeText(shareUrl.value)
+    shareCopied.value = true
+    setTimeout(() => { shareCopied.value = false }, 2500)
+  } catch {
+    // fallback: select text
+  }
 }
 </script>
 
@@ -856,6 +932,77 @@ const formatDateTime = (dateStr: string) => {
   font-size: 0.78rem;
   color: var(--t3);
   padding: 7px 12px;
+}
+
+/* ── Floating Share Button ── */
+.btn-share {
+  position: fixed;
+  bottom: 128px;
+  right: 16px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--gold);
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-share:hover {
+  background: var(--card-hover);
+  border-color: var(--gold-a2);
+}
+
+/* ── Share Modal Content ── */
+.share-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--t2);
+  font-size: 0.88rem;
+  padding: 16px 0;
+}
+.share-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-dim);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.share-url-box {
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  word-break: break-all;
+  max-height: 80px;
+  overflow-y: auto;
+}
+.share-url-text {
+  font-size: 0.72rem;
+  color: var(--t2);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  line-height: 1.5;
+}
+.btn-submit.copied {
+  background: #2d6a4f;
+  box-shadow: 0 4px 16px rgba(45, 106, 79, 0.3);
+}
+.share-empty {
+  color: var(--t2);
+  font-size: 0.88rem;
+  padding: 12px 0;
 }
 
 /* ── Floating Info Button ── */
