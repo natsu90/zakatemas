@@ -57,6 +57,7 @@
                 <div v-for="e in item.entries" :key="e._id" class="record-row">
                   <span class="record-date">{{ formatDate(e.date) }}</span>
                   <span class="record-gram">{{ e.gram }}g</span>
+                  <button class="record-delete" @click.stop="handleDelete(e)">✕</button>
                 </div>
               </div>
             </template>
@@ -842,6 +843,23 @@ const copyShareUrl = async () => {
 
 .card-records {
   margin-top: 8px;
+}
+
+.record-delete {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--t3);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 1px 5px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+.record-delete:hover {
+  color: var(--red);
+  background: var(--red-a);
 }
 
 .collateral-tag {

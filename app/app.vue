@@ -362,14 +362,17 @@ body {
 }
 .record-row {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
   font-size: 0.8rem;
 }
 .record-date {
+  flex: 1;
   color: var(--t3);
 }
 .record-gram {
-  font-weight: 500;
-  color: var(--t2);
+  font-weight: 600;
+  color: var(--t1);
+  flex-shrink: 0;
 }
 </style>
