@@ -181,6 +181,9 @@
           <span>Menjana pautan…</span>
         </div>
         <template v-else-if="shareUrl">
+          <div v-if="shareQrDataUrl" class="share-qr-wrap">
+            <img :src="shareQrDataUrl" alt="QR kod pautan kongsi" class="share-qr" />
+          </div>
           <div class="share-url-box">
             <span class="share-url-text">{{ shareUrl }}</span>
           </div>
@@ -521,6 +524,7 @@ const formatDateTime = (dateStr: string) => {
 // ── Share ──────────────────────────────────────────────────────────────────
 const showShareModal = ref(false)
 const shareUrl = ref('')
+const shareQrDataUrl = ref('')
 const shareLoading = ref(false)
 const shareCopied = ref(false)
 
@@ -528,6 +532,7 @@ const openShareModal = async () => {
   showShareModal.value = true
   shareLoading.value = true
   shareUrl.value = ''
+  shareQrDataUrl.value = ''
   shareCopied.value = false
 
   if (!entries.value.length) {
@@ -544,6 +549,8 @@ const openShareModal = async () => {
     // Use the current page URL as the app root (works on localhost, custom domain, and GitHub Pages subdirs)
     const appRoot = window.location.href.split('?')[0].split('#')[0].replace(/\/+$/, '')
     shareUrl.value = `${appRoot}/share/${compressed}`
+    const QRCode = await import('qrcode')
+    shareQrDataUrl.value = await QRCode.toDataURL(shareUrl.value, { width: 220, margin: 2 })
   } catch (e) {
     console.error(e)
   } finally {
@@ -977,6 +984,16 @@ const copyShareUrl = async () => {
 }
 
 /* ── Share Modal Content ── */
+.share-qr-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.share-qr {
+  width: 220px;
+  height: 220px;
+  border-radius: var(--r-sm);
+}
 .share-loading {
   display: flex;
   align-items: center;
