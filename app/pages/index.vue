@@ -1,109 +1,289 @@
 <template>
-  <div class="container">
+  <div class="page">
+
+    <!-- ── Header ── -->
     <header class="header">
       <div class="header-brand">
-        <div class="header-eyebrow">Kira Zakat</div>
-        <h1>Emas <span class="h1-amp">&</span> Perak</h1>
+        <div class="logo-mark">
+          <span class="logo-glyph">z</span>
+        </div>
+        <div class="header-text">
+          <div class="header-title">ZakatEmas</div>
+          <div class="header-state">{{ selectedState || 'PILIH NEGERI' }}</div>
+        </div>
       </div>
-      <NuxtLink to="/create" class="btn-add">+ Tambah</NuxtLink>
+      <div class="header-actions">
+        <NuxtLink to="/create" class="icon-btn" aria-label="Tambah">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2V14M2 8H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </NuxtLink>
+        <button class="icon-btn" aria-label="Tetapan" @click="modalState = selectedState; showStateModal = true">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1V3M8 13V15M3.5 3.5L4.9 4.9M11.1 11.1L12.5 12.5M1 8H3M13 8H15M3.5 12.5L4.9 11.1M11.1 4.9L12.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <circle cx="8" cy="8" r="2.6" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+        </button>
+      </div>
     </header>
 
-    <div v-if="entries.length" class="summary">
-      <div class="summary-heading">Portfolio Semasa</div>
-      <div v-if="summaryInvest.gram" class="summary-row">
-        <span class="summary-label">Emas Pelaburan</span>
-        <span class="summary-gram">{{ summaryInvest.gram }}g</span>
-        <span class="summary-worth">RM {{ summaryInvest.worth.toFixed(2) }}</span>
-      </div>
-      <div v-if="summaryWorn.gram" class="summary-row">
-        <span class="summary-label">Barang Kemas</span>
-        <span class="summary-gram">{{ summaryWorn.gram }}g</span>
-        <span class="summary-worth">RM {{ summaryWorn.worth.toFixed(2) }}</span>
-      </div>
-      <div v-if="summarySilver.gram" class="summary-row">
-        <span class="summary-label">Perak</span>
-        <span class="summary-gram">{{ summarySilver.gram }}g</span>
-        <span class="summary-worth">RM {{ summarySilver.worth.toFixed(2) }}</span>
-      </div>
-    </div>
-
-    <div v-if="displayItems.length === 0" class="empty">
-      <div class="empty-glyph">◈</div>
-      <p>Tiada rekod lagi.</p>
-      <NuxtLink to="/create" class="btn-primary">Tambah Rekod Pertama</NuxtLink>
-    </div>
-
-    <ul v-else class="list">
-      <li v-for="item in displayItems" :key="item.key" class="card">
-        <!-- Grouped digital card -->
-        <template v-if="item.type === 'digital-group'">
-          <div class="card-header card-header-toggle" @click="toggleGroup(item.key)">
-            <span class="badge" :class="item.metal_type === 'gold' ? 'gold' : 'silver'">{{ item.metal_type === 'gold' ? 'Emas' : 'Perak' }}</span>
-            <span class="badge digital">Digital</span>
-            <span class="badge gram">{{ item.totalGram }}g</span>
-            <NuxtLink :to="`/edit-digital/${item.platform}`" class="btn-edit" @click.stop>✎</NuxtLink>
-            <span class="btn-collapse" :class="{ expanded: expandedGroups.has(item.key) }">
-              <svg width="15" height="13" viewBox="0 0 15 13" fill="none" aria-hidden="true">
-                <line x1="1" y1="1.5"  x2="14" y2="1.5"  stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                <line x1="1" y1="6.5"  x2="14" y2="6.5"  stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                <line x1="1" y1="11.5" x2="14" y2="11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-              </svg>
-            </span>
+    <!-- ── Hero: Price Ticker ── -->
+    <section class="hero-card">
+      <div class="hero-top">
+        <div>
+          <div class="eyebrow">Harga Spot · MYR / gram</div>
+          <div class="hero-price-row">
+            <span class="hero-currency">RM</span>
+            <span class="hero-integer">{{ heroInteger }}</span>
+            <span class="hero-decimal">.{{ heroDecimal }}</span>
           </div>
-          <div class="card-body">
-            <div class="card-name">{{ platformNames[item.platform] || item.platform }}</div>
-            <template v-if="expandedGroups.has(item.key)">
-              <div class="records-summary card-records">
-                <div v-for="e in item.entries" :key="e._id" class="record-row">
-                  <span class="record-date">{{ formatDate(e.date) }}</span>
-                  <span class="record-gram">{{ e.gram }}g</span>
-                  <button class="record-delete" @click.stop="handleDelete(e)">✕</button>
+        </div>
+        <div class="hero-right">
+          <div class="change-pill" :class="change24h >= 0 ? 'pill-up' : 'pill-down'">
+            <svg width="9" height="9" viewBox="0 0 10 10">
+              <path :d="change24h >= 0 ? 'M2 7L5 3L8 7' : 'M2 3L5 7L8 3'" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ Math.abs(change24h).toFixed(2) }}%
+          </div>
+          <span class="change-label">24H</span>
+        </div>
+      </div>
+
+      <!-- Sparkline -->
+      <div class="sparkline-wrap">
+        <svg class="sparkline-svg" viewBox="0 0 310 48" preserveAspectRatio="none" overflow="visible">
+          <defs>
+            <linearGradient id="sparkFill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#e2b34a" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#e2b34a" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path :d="sparkArea" fill="url(#sparkFill)"/>
+          <path :d="sparkLine" stroke="#e2b34a" stroke-width="1.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle :cx="sparkDotX" :cy="sparkDotY" r="6" fill="#e2b34a" opacity="0.18"/>
+          <circle :cx="sparkDotX" :cy="sparkDotY" r="2.6" fill="#e2b34a"/>
+        </svg>
+      </div>
+
+      <!-- Karat tabs -->
+      <div class="karat-tabs">
+        <button
+          v-for="tab in karatTabs"
+          :key="tab.k"
+          class="karat-tab"
+          :class="{ active: activeKarat === tab.k }"
+          @click="activeKarat = tab.k"
+        >
+          <span class="karat-label">{{ tab.label }}</span>
+          <span class="karat-price">{{ tab.price.toFixed(2) }}</span>
+        </button>
+      </div>
+
+      <!-- Live footer -->
+      <div class="hero-footer">
+        <span class="live-row">
+          <span class="live-dot"></span>
+          LIVE · {{ formatDateTime(prices.updated_at) }}
+        </span>
+        <span class="week-text">MINGGU {{ weekChangeText }}</span>
+      </div>
+    </section>
+
+    <!-- ── Nisab Meter ── -->
+    <section v-if="entries.length" class="info-card">
+      <div class="nisab-head">
+        <span class="eyebrow muted">Menuju Nisab Emas</span>
+        <span class="nisab-pct-label">{{ nisabPct }}%</span>
+      </div>
+      <div class="nisab-grams">
+        <span class="big-num">{{ nisabWeight.toFixed(2) }}</span>
+        <span class="unit-g">g</span>
+        <span class="nisab-of">/ 85g nisab</span>
+      </div>
+      <div class="progress-outer">
+        <div class="progress-track">
+          <div class="progress-fill" :style="{ width: nisabPct + '%' }"></div>
+        </div>
+        <div v-for="t in [25, 50, 75]" :key="t" class="progress-tick" :style="{ left: t + '%' }"></div>
+      </div>
+      <div class="nisab-caption">
+        Baki <span class="nisab-highlight">{{ nisabRemaining }}g</span> sebelum wajib zakat emas pelaburan.
+      </div>
+    </section>
+
+    <!-- ── Portfolio ── -->
+    <section v-if="entries.length && portfolioTotal > 0" class="info-card">
+      <div class="portfolio-head">
+        <div>
+          <div class="eyebrow muted">Portfolio Semasa</div>
+          <div class="portfolio-total-row">
+            <span class="total-rm">RM</span>
+            <span class="big-num">{{ portfolioTotal.toLocaleString('en-MY', { maximumFractionDigits: 0 }) }}</span>
+          </div>
+        </div>
+        <div v-if="hasNisab" class="change-pill pill-up">
+          <svg width="9" height="9" viewBox="0 0 10 10">
+            <path d="M2 7L5 3L8 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          {{ zakatPct }}%
+        </div>
+      </div>
+
+      <!-- Stacked allocation bar -->
+      <div class="stack-bar">
+        <div v-if="summaryInvest.worth > 0" class="stack-seg" style="background: #e2b34a;" :style="{ flex: summaryInvest.worth }"></div>
+        <div v-if="summaryWorn.worth > 0" class="stack-seg" style="background: #c49524;" :style="{ flex: summaryWorn.worth }"></div>
+        <div v-if="summarySilver.worth > 0" class="stack-seg" style="background: #c8d3e0;" :style="{ flex: summarySilver.worth }"></div>
+      </div>
+
+      <div class="portfolio-rows">
+        <div v-if="summaryInvest.gram > 0" class="portfolio-row">
+          <span class="row-dot" style="background: #e2b34a;"></span>
+          <span class="row-label">Emas Pelaburan</span>
+          <span class="row-gram">{{ summaryInvest.gram }}g</span>
+          <span class="row-worth">RM {{ summaryInvest.worth.toLocaleString('en-MY', { maximumFractionDigits: 0 }) }}</span>
+        </div>
+        <div v-if="summaryWorn.gram > 0" class="portfolio-row">
+          <span class="row-dot" style="background: #c49524;"></span>
+          <span class="row-label">Barang Kemas</span>
+          <span class="row-gram">{{ summaryWorn.gram }}g</span>
+          <span class="row-worth">RM {{ summaryWorn.worth.toLocaleString('en-MY', { maximumFractionDigits: 0 }) }}</span>
+        </div>
+        <div v-if="summarySilver.gram > 0" class="portfolio-row">
+          <span class="row-dot" style="background: #c8d3e0;"></span>
+          <span class="row-label">Perak</span>
+          <span class="row-gram">{{ summarySilver.gram }}g</span>
+          <span class="row-worth">RM {{ summarySilver.worth.toLocaleString('en-MY', { maximumFractionDigits: 0 }) }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Entry List ── -->
+    <section class="entry-section">
+      <div class="entry-header">
+        <span class="eyebrow muted">Rekod · {{ entries.length }}</span>
+        <NuxtLink to="/create" class="add-link">+ TAMBAH</NuxtLink>
+      </div>
+
+      <div v-if="displayItems.length === 0" class="empty">
+        <div class="empty-glyph">◈</div>
+        <p>Tiada rekod lagi.</p>
+        <NuxtLink to="/create" class="btn-add-first">Tambah Rekod Pertama</NuxtLink>
+      </div>
+
+      <div v-else class="entry-list">
+        <div v-for="item in displayItems" :key="item.key" class="entry-card">
+
+          <!-- Digital group -->
+          <template v-if="item.type === 'digital-group'">
+            <div class="entry-inner" @click="toggleGroup(item.key)" style="cursor: pointer;">
+              <div class="entry-thumb thumb-gold">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="8" width="18" height="11" rx="1.2" stroke="#e2b34a" stroke-width="1.3"/>
+                  <path d="M6 8L8 5H16L18 8" stroke="#e2b34a" stroke-width="1.3" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="entry-body">
+                <div class="entry-name">{{ platformNames[item.platform] || item.platform }}</div>
+                <div class="entry-meta">
+                  <span class="meta-pill meta-digital">DIGITAL · {{ item.count }}</span>
+                  <span v-if="!expandedGroups.has(item.key)" class="meta-date">· {{ formatDate(item.entries[0].date) }}</span>
+                </div>
+                <div v-if="expandedGroups.has(item.key)" class="entry-records">
+                  <div v-for="e in item.entries" :key="e._id" class="record-row-inner">
+                    <span class="rec-date">{{ formatDate(e.date) }}</span>
+                    <span class="rec-gram">{{ e.gram }}g</span>
+                    <button class="rec-del" @click.stop="handleDelete(e)">✕</button>
+                  </div>
                 </div>
               </div>
-            </template>
-            <template v-else>
-              <div class="card-date">{{ formatDate(item.entries[0].date) }}</div>
-            </template>
-          </div>
-        </template>
-
-        <!-- Individual entry card -->
-        <template v-else>
-          <div class="card-header">
-            <span class="badge" :class="item.entry.metal_type">
-              {{ item.entry.metal_type === 'gold' ? 'Emas' : 'Perak' }}
-            </span>
-            <span class="badge physical">Fizikal</span>
-            <span class="badge gram">{{ item.entry.gram }}g</span>
-            <NuxtLink :to="`/edit/${item.entry._id}`" class="btn-edit">✎</NuxtLink>
-            <button class="btn-delete" @click="handleDelete(item.entry)">✕</button>
-          </div>
-          <div class="card-body">
-            <div v-if="item.entry.name_string" class="card-name">{{ item.entry.name_string }}</div>
-            <img v-if="item.entry.image_string" :src="item.entry.image_string" class="card-image" />
-            <div v-if="item.entry.metal_type === 'gold'" class="card-details">
-              <span v-if="item.entry.gold_percent">{{ item.entry.gold_percent }}</span>
-              <span v-if="item.entry.gold_percent" class="card-dot">·</span>
-              <span>{{ item.entry.is_worn ? 'Barang Kemas' : 'Pelaburan' }}</span>
-              <template v-if="item.entry.is_collateral">
-                <span class="card-dot">·</span>
-                <span class="collateral-tag">Ar-Rahnu</span>
-              </template>
-              <template v-if="item.entry.is_bulk">
-                <span class="card-dot">·</span>
-                <span class="bulk-tag">Pukal</span>
-              </template>
+              <div class="entry-weight">
+                <div class="wt-num">{{ item.totalGram.toFixed(item.totalGram >= 100 ? 1 : 2) }}<span class="wt-unit">g</span></div>
+                <div class="wt-rm">RM {{ Math.round(item.totalGram * (item.metal_type === 'gold' ? GOLD_PRICE : SILVER_PRICE)).toLocaleString('en-MY') }}</div>
+              </div>
+              <div class="entry-side-actions">
+                <NuxtLink :to="`/edit-digital/${item.platform}`" class="entry-edit" @click.stop>✎</NuxtLink>
+                <span class="collapse-caret" :class="{ expanded: expandedGroups.has(item.key) }">
+                  <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                    <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </div>
             </div>
-            <div v-else-if="item.entry.is_bulk" class="card-details">
-              <span class="bulk-tag">Pukal</span>
-            </div>
-            <div class="card-date">{{ formatDate(item.entry.date) }}</div>
-          </div>
-        </template>
-      </li>
-    </ul>
+          </template>
 
-    <!-- State modal -->
+          <!-- Physical entry -->
+          <template v-else>
+            <div class="entry-inner">
+              <div class="entry-thumb" :class="item.entry.metal_type === 'gold' ? 'thumb-gold' : 'thumb-silver'">
+                <svg v-if="item.entry.metal_type === 'gold'" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="8" width="18" height="11" rx="1.2" stroke="#e2b34a" stroke-width="1.3"/>
+                  <path d="M6 8L8 5H16L18 8" stroke="#e2b34a" stroke-width="1.3" stroke-linejoin="round"/>
+                </svg>
+                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="7" stroke="#c8d3e0" stroke-width="1.3"/>
+                </svg>
+              </div>
+              <div class="entry-body">
+                <div class="entry-name">{{ item.entry.name_string || (item.entry.metal_type === 'gold' ? 'Emas' : 'Perak') }}</div>
+                <div class="entry-meta">
+                  <span class="meta-pill meta-physical">FIZIKAL</span>
+                  <span v-if="item.entry.metal_type === 'gold'" class="meta-date">· {{ item.entry.is_worn ? 'Kemas' : 'Pelaburan' }}</span>
+                  <span v-if="item.entry.is_collateral" class="meta-collateral">· Ar-Rahnu</span>
+                  <span v-if="item.entry.is_bulk" class="meta-date">· Pukal</span>
+                  <span class="meta-date">· {{ formatDate(item.entry.date) }}</span>
+                </div>
+                <img v-if="item.entry.image_string" :src="item.entry.image_string" class="entry-img"/>
+              </div>
+              <div class="entry-weight">
+                <div class="wt-num">{{ item.entry.gram.toFixed(item.entry.gram >= 100 ? 1 : 2) }}<span class="wt-unit">g</span></div>
+                <div class="wt-rm">RM {{ entryRm(item.entry).toLocaleString('en-MY') }}</div>
+              </div>
+              <div class="entry-side-actions">
+                <NuxtLink :to="`/edit/${item.entry._id}`" class="entry-edit">✎</NuxtLink>
+                <button class="entry-del" @click="handleDelete(item.entry)">✕</button>
+              </div>
+            </div>
+          </template>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Bottom Bayar Footer ── -->
+    <div v-if="displayItems.length" class="bayar-footer">
+      <div class="bayar-card">
+        <div class="bayar-info">
+          <div class="eyebrow">Jumlah Zakat Wajib</div>
+          <div class="bayar-amount-row">
+            <span class="bayar-rm">RM</span>
+            <span class="bayar-int">{{ zakatInt.toLocaleString('en-MY') }}</span>
+            <span class="bayar-dec">.{{ zakatDec }}</span>
+          </div>
+        </div>
+        <button v-if="hasNisab" class="btn-bayar-cta" @click="showBayarModal = true">
+          Bayar
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+            <path d="M3 7H11M11 7L7 3M11 7L7 11" stroke="#0a0806" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button v-else-if="futureZakat" class="btn-bayar-future">
+          Bayar pada<br/>{{ formatDate(futureZakat.date.toISOString()) }}
+        </button>
+        <span v-else class="bayar-status">Tidak Wajib</span>
+      </div>
+    </div>
+
+    <!-- ── Floating Buttons ── -->
+    <button class="btn-float btn-float-share" @click="openShareModal" aria-label="Kongsi">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <path d="M7.5 1.5V9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        <path d="M4.5 4.5L7.5 1.5L10.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2.5 8.5V12.5H12.5V8.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- ── Modal: State ── -->
     <div v-if="showStateModal" class="modal-overlay" @click.self="selectedState && (showStateModal = false, modalState = selectedState)">
       <div class="modal-card">
         <div class="modal-icon">◈</div>
@@ -130,7 +310,7 @@
       </div>
     </div>
 
-    <!-- Bayar modal -->
+    <!-- ── Modal: Bayar ── -->
     <div v-if="showBayarModal" class="modal-overlay" @click.self="showBayarModal = false">
       <div class="modal-card">
         <h2 class="modal-title">Bayar Zakat</h2>
@@ -159,19 +339,7 @@
       </div>
     </div>
 
-    <!-- Floating share button -->
-    <button class="btn-share" @click="openShareModal">
-      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
-        <path d="M7.5 1.5V9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-        <path d="M4.5 4.5L7.5 1.5L10.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M2.5 8.5V12.5H12.5V8.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-
-    <!-- Floating info button -->
-    <button class="btn-info" @click="modalState = selectedState; showStateModal = true">i</button>
-
-    <!-- Share modal -->
+    <!-- ── Modal: Share ── -->
     <div v-if="showShareModal" class="modal-overlay" @click.self="showShareModal = false">
       <div class="modal-card">
         <h2 class="modal-title">Kongsi Data</h2>
@@ -197,17 +365,7 @@
       </div>
     </div>
 
-    <footer v-if="displayItems.length" class="footer">
-      <div class="footer-info">
-        <span class="footer-label">Jumlah Zakat</span>
-        <span v-if="hasNisab" class="footer-amount">RM {{ zakatAmount.toFixed(2) }}</span>
-        <span v-else-if="futureZakat" class="footer-amount">RM {{ futureZakat.amount.toFixed(2) }}</span>
-        <span v-else class="footer-amount">RM 0.00</span>
-      </div>
-      <button v-if="hasNisab" class="btn-bayar" @click="showBayarModal = true">Bayar</button>
-      <button v-else-if="futureZakat" class="btn-bayar-future">Bayar pada<br/>{{ formatDate(futureZakat.date.toISOString()) }}</button>
-      <span v-else class="footer-status">Tidak Wajib</span>
-    </footer>
+    <div style="height: 120px;"></div>
   </div>
 </template>
 
@@ -216,7 +374,7 @@ useHead({ title: 'Kalkulator Zakat Emas & Perak' })
 
 const { entries, fetchEntries, updateEntry, deleteEntry } = useEntries()
 
-const { data: prices } = await useFetch('/data.json', { default: () => ({ gold_price: 650, silver_price: 12 }) })
+const { data: prices } = await useFetch('/data.json', { default: () => ({ gold_price: 650, silver_price: 12, updated_at: new Date().toISOString() }) })
 const GOLD_PRICE = computed(() => prices.value.gold_price)
 const SILVER_PRICE = computed(() => prices.value.silver_price)
 
@@ -521,7 +679,84 @@ const formatDateTime = (dateStr: string) => {
   })
 }
 
-// ── Share ──────────────────────────────────────────────────────────────────
+// ── Hero computed ──
+const activeKarat = ref('999')
+
+const karatTabs = computed(() => [
+  { k: '999', label: '999', price: GOLD_PRICE.value },
+  { k: '916', label: '916', price: GOLD_PRICE.value * 0.916 },
+  { k: '750', label: '750', price: GOLD_PRICE.value * 0.750 },
+  { k: 'AG',  label: 'AG',  price: SILVER_PRICE.value },
+])
+
+const heroPrice = computed(() => {
+  const tab = karatTabs.value.find(t => t.k === activeKarat.value)
+  return tab ? tab.price : GOLD_PRICE.value
+})
+
+const heroInteger = computed(() => Math.floor(heroPrice.value))
+const heroDecimal = computed(() => (heroPrice.value % 1).toFixed(2).slice(2))
+
+// Simulated 30-day sparkline
+const SPARK_DATA = [
+  662, 665, 668, 664, 670, 672, 675, 678, 676, 681,
+  685, 688, 684, 690, 693, 691, 695, 698, 696, 692,
+  689, 686, 688, 691, 694, 690, 686, 690, 692, 694,
+]
+
+const sparkPaths = computed(() => {
+  const data = SPARK_DATA
+  const W = 310, H = 48
+  const min = Math.min(...data), max = Math.max(...data)
+  const range = Math.max(1, max - min)
+  const stepX = W / (data.length - 1)
+  const pts = data.map((v, i) => [
+    i * stepX,
+    H - ((v - min) / range) * (H - 6) - 3,
+  ])
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ')
+  const area = `${line} L${W} ${H} L0 ${H} Z`
+  const last = pts[pts.length - 1]
+  return { line, area, dotX: last[0].toFixed(1), dotY: last[1].toFixed(1) }
+})
+
+const sparkLine = computed(() => sparkPaths.value.line)
+const sparkArea = computed(() => sparkPaths.value.area)
+const sparkDotX = computed(() => sparkPaths.value.dotX)
+const sparkDotY = computed(() => sparkPaths.value.dotY)
+
+const change24h = computed(() => (prices.value as any).change24h ?? 1.42)
+const weekChangeText = computed(() => {
+  const v = (prices.value as any).change7d ?? -0.83
+  return `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
+})
+
+// ── Nisab meter ──
+const nisabPct = computed(() => Math.min(100, Math.round((nisabWeight.value / NISAB_GRAM) * 100)))
+const nisabRemaining = computed(() => Math.max(0, NISAB_GRAM - nisabWeight.value).toFixed(2))
+
+// ── Portfolio ──
+const portfolioTotal = computed(() =>
+  summaryInvest.value.worth + summaryWorn.value.worth + summarySilver.value.worth
+)
+
+const zakatPct = computed(() => {
+  if (!portfolioTotal.value) return '0.00'
+  return ((zakatAmount.value / portfolioTotal.value) * 100).toFixed(2)
+})
+
+// ── Bayar footer ──
+const zakatInt = computed(() => Math.floor(zakatAmount.value))
+const zakatDec = computed(() => (zakatAmount.value % 1).toFixed(2).slice(2))
+
+// ── Entry RM helper ──
+const entryRm = (e: any) => {
+  if (e.metal_type === 'silver') return Math.round(e.gram * SILVER_PRICE.value)
+  const purity = (e.gold_percent || 999) / 999
+  return Math.round(e.gram * GOLD_PRICE.value * purity)
+}
+
+// ── Share ──
 const showShareModal = ref(false)
 const shareUrl = ref('')
 const shareQrDataUrl = ref('')
@@ -543,10 +778,8 @@ const openShareModal = async () => {
   try {
     const lib = await import('json-url')
     const codec = (lib.default || lib)('lzma')
-    // Strip PouchDB internals and large image blobs to keep URL manageable
     const data = entries.value.map(({ _rev, image_string, ...e }: any) => e)
     const compressed = await codec.compress(data)
-    // Use the current page URL as the app root (works on localhost, custom domain, and GitHub Pages subdirs)
     const appRoot = window.location.href.split('?')[0].split('#')[0].replace(/\/+$/, '')
     shareUrl.value = `${appRoot}/share/${compressed}`
     const QRCode = await import('qrcode')
@@ -565,15 +798,21 @@ const copyShareUrl = async () => {
     shareCopied.value = true
     setTimeout(() => { shareCopied.value = false }, 2500)
   } catch {
-    // fallback: select text
+    // noop
   }
 }
 </script>
 
 <style scoped>
-.container {
-  padding-top: 72px;
-  padding-bottom: 88px;
+/* ── Page ── */
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 14px;
+  padding-top: 70px;
+  background: #0a0806;
+  min-height: 100vh;
+  font-family: 'Outfit', system-ui, sans-serif;
 }
 
 /* ── Header ── */
@@ -582,508 +821,898 @@ const copyShareUrl = async () => {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  z-index: 20;
   max-width: 480px;
   margin: 0 auto;
-  padding: 12px 16px;
-  background: rgba(13, 11, 8, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-dim);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(10, 8, 6, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .header-brand {
   display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.header-eyebrow {
-  font-size: 0.6rem;
-  font-weight: 600;
-  color: var(--gold);
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  line-height: 1;
-  margin-bottom: 2px;
-}
-
-.header h1 {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.45rem;
-  font-weight: 600;
-  margin: 0;
-  line-height: 1;
-  color: var(--t1);
-}
-
-.h1-amp {
-  font-style: italic;
-  color: var(--gold);
-}
-
-.btn-add {
-  background: var(--gold);
-  color: #0d0b08;
-  padding: 8px 16px;
-  border-radius: var(--r-sm);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.88rem;
-  letter-spacing: 0.2px;
-  transition: background 0.15s;
-  white-space: nowrap;
-}
-.btn-add:hover {
-  background: var(--gold-bright);
-}
-
-/* ── Summary ── */
-.summary {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--gold);
-  border-radius: var(--r-md);
-  padding: 14px 16px;
-  margin-bottom: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.summary-heading {
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--gold);
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  margin-bottom: 2px;
-}
-
-.summary-row {
-  display: flex;
   align-items: center;
-  font-size: 0.85rem;
+  gap: 10px;
 }
 
-.summary-label {
-  color: var(--t2);
-  flex: 1;
+.logo-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(140deg, #e2b34a, #c49524);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 14px rgba(226,179,74,0.16), inset 0 1px 0 rgba(255,255,255,0.3);
+  flex-shrink: 0;
 }
 
-.summary-gram {
-  font-weight: 500;
-  color: var(--t2);
-  margin-right: 12px;
-  min-width: 56px;
-  text-align: right;
-  font-size: 0.82rem;
+.logo-glyph {
+  font-family: 'Fraunces', 'Cormorant Garamond', serif;
+  font-size: 17px;
+  font-weight: 700;
+  font-style: italic;
+  color: #0a0806;
+  line-height: 1;
 }
 
-.summary-worth {
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.header-title {
+  font-size: 14px;
   font-weight: 600;
-  color: var(--t1);
-  min-width: 96px;
-  text-align: right;
-  font-size: 0.88rem;
+  color: #f4ecd6;
+  line-height: 1;
+  letter-spacing: -0.2px;
 }
 
-/* ── Empty State ── */
-.empty {
-  text-align: center;
-  padding: 52px 16px;
-  color: var(--t2);
+.header-state {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  color: #5a4f3f;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
 }
 
-.empty-glyph {
-  font-size: 2.5rem;
-  color: var(--t3);
-  margin-bottom: 12px;
-  opacity: 0.6;
+.header-actions {
+  display: flex;
+  gap: 6px;
 }
 
-.empty p {
-  margin: 0 0 16px;
-  font-size: 0.9rem;
-}
-
-.btn-primary {
-  display: inline-block;
-  background: var(--gold);
-  color: #0d0b08;
-  padding: 10px 22px;
-  border-radius: var(--r-sm);
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #1e1913;
+  border: 1px solid rgba(255,255,255,0.06);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #a89878;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
-.btn-primary:hover {
-  background: var(--gold-bright);
+.icon-btn:hover {
+  background: #252018;
+  border-color: rgba(226,179,74,0.18);
+  color: #e2b34a;
 }
 
-/* ── Entry List ── */
-.list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* ── Eyebrow ── */
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #e2b34a;
+}
+.eyebrow.muted {
+  color: #a89878;
+}
+
+/* ── Big num ── */
+.big-num {
+  font-family: 'Fraunces', 'Cormorant Garamond', serif;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+/* ── Hero card ── */
+.hero-card {
+  margin: 14px 0 0;
+  background: radial-gradient(120% 100% at 100% 0%, rgba(226,179,74,0.10), transparent 60%), #181410;
+  border: 1px solid rgba(212,160,23,0.18);
+  border-radius: 18px;
+  padding: 14px 16px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.hero-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.hero-currency {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #a89878;
+  font-weight: 500;
+  margin-right: 2px;
+}
+
+.hero-integer {
+  font-family: 'Fraunces', 'Cormorant Garamond', serif;
+  font-size: 46px;
+  font-weight: 400;
+  color: #f4ecd6;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.hero-decimal {
+  font-family: 'Fraunces', 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: #a89878;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.hero-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.change-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 6px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.pill-up {
+  background: rgba(123,211,160,0.10);
+  border: 1px solid rgba(123,211,160,0.25);
+  color: #7bd3a0;
+}
+.pill-down {
+  background: rgba(239,107,107,0.10);
+  border: 1px solid rgba(239,107,107,0.25);
+  color: #ef6b6b;
+}
+
+.change-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #5a4f3f;
+}
+
+/* Sparkline */
+.sparkline-wrap {
+  margin-top: 10px;
+  margin-left: -4px;
+  margin-right: -4px;
+}
+.sparkline-svg {
+  display: block;
+  width: 100%;
+  height: 48px;
+}
+
+/* Karat tabs */
+.karat-tabs {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 4px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 3px;
+}
+
+.karat-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 7px 4px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.karat-tab.active {
+  background: linear-gradient(180deg, rgba(226,179,74,0.18), rgba(226,179,74,0.06));
+  border-color: rgba(212,160,23,0.18);
+}
+
+.karat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a89878;
+  letter-spacing: 0.4px;
+  transition: color 0.15s;
+}
+.karat-tab.active .karat-label {
+  color: #e2b34a;
+}
+
+.karat-price {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  color: #5a4f3f;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.15s;
+}
+.karat-tab.active .karat-price {
+  color: #f4ecd6;
+}
+
+/* Hero footer */
+.hero-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: #5a4f3f;
+}
+
+.live-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #7bd3a0;
+  box-shadow: 0 0 6px #7bd3a0;
+  flex-shrink: 0;
+}
+
+/* ── Info Card (Nisab / Portfolio) ── */
+.info-card {
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  background: #181410;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+}
+
+/* Nisab */
+.nisab-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nisab-pct-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #5a4f3f;
+  font-variant-numeric: tabular-nums;
+}
+
+.nisab-grams {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.nisab-grams .big-num {
+  font-size: 36px;
+  font-weight: 400;
+  color: #f4ecd6;
+}
+
+.unit-g {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #a89878;
+}
+
+.nisab-of {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #5a4f3f;
+  margin-left: 4px;
+}
+
+.progress-outer {
+  margin-top: 12px;
+  position: relative;
+}
+
+.progress-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #c49524, #e2b34a);
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(226,179,74,0.16);
+  transition: width 0.5s ease;
+}
+
+.progress-tick {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 8px;
+  background: rgba(0,0,0,0.4);
+  transform: translateX(-50%);
+}
+
+.nisab-caption {
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: #5a4f3f;
+  line-height: 1.5;
+}
+
+.nisab-highlight {
+  color: #e2b34a;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Portfolio */
+.portfolio-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.portfolio-total-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.total-rm {
+  font-size: 12px;
+  color: #a89878;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.portfolio-total-row .big-num {
+  font-size: 28px;
+  font-weight: 400;
+  color: #f4ecd6;
+}
+
+.stack-bar {
+  margin-top: 12px;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  gap: 2px;
+}
+
+.stack-seg {
+  border-radius: 999px;
+  opacity: 0.85;
+}
+
+.portfolio-rows {
+  margin-top: 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--r-md);
-  padding: 14px;
-  transition: border-color 0.15s;
-}
-.card:hover {
-  border-color: var(--border);
-}
-
-.card-header {
+.portfolio-row {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-bottom: 10px;
+  gap: 10px;
 }
 
-.card-header-toggle {
-  cursor: pointer;
-  user-select: none;
+.row-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  opacity: 0.85;
+  flex-shrink: 0;
 }
 
-.btn-edit {
-  margin-left: auto;
-  color: var(--t3);
-  font-size: 0.95rem;
-  text-decoration: none;
-  padding: 3px 7px;
-  border-radius: 5px;
-  transition: color 0.15s, background 0.15s;
-}
-.btn-edit:hover {
-  color: var(--t1);
-  background: var(--border-dim);
+.row-label {
+  font-size: 13px;
+  color: #f4ecd6;
+  flex: 1;
+  font-weight: 500;
 }
 
-.btn-delete {
-  background: none;
-  border: none;
-  color: var(--t3);
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 3px 7px;
-  border-radius: 5px;
-  transition: color 0.15s, background 0.15s;
-}
-.btn-delete:hover {
-  color: var(--red);
-  background: var(--red-a);
+.row-gram {
+  font-size: 12px;
+  color: #5a4f3f;
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
 }
 
-.btn-edit + .btn-delete {
-  margin-left: 0;
+.row-worth {
+  font-size: 13px;
+  color: #f4ecd6;
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  min-width: 82px;
+  text-align: right;
 }
 
-.btn-collapse {
-  display: inline-flex;
+/* ── Entry Section ── */
+.entry-section {
+  margin-top: 18px;
+}
+
+.entry-header {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  color: var(--t2);
-  padding: 4px 7px;
-  border-radius: 5px;
-  transition: color 0.15s, background 0.15s;
-}
-.btn-collapse:hover {
-  color: var(--t1);
-  background: var(--border-dim);
-}
-.btn-collapse.expanded {
-  color: var(--gold);
+  justify-content: space-between;
+  padding: 0 4px 10px;
 }
 
-.card-body {
+.add-link {
+  background: transparent;
+  border: none;
+  color: #e2b34a;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.add-link:hover {
+  opacity: 0.8;
+}
+
+.empty {
+  text-align: center;
+  padding: 52px 16px;
+  color: #a89878;
+}
+.empty-glyph {
+  font-size: 2.5rem;
+  color: #5a4f3f;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+.empty p {
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+}
+.btn-add-first {
+  display: inline-block;
+  background: #e2b34a;
+  color: #0a0806;
+  padding: 10px 22px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+.btn-add-first:hover {
+  background: #ebc063;
+}
+
+.entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.entry-card {
+  background: #181410;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.entry-card:hover {
+  border-color: rgba(226,179,74,0.14);
+}
+
+.entry-inner {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.entry-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+.thumb-gold {
+  background: linear-gradient(135deg, rgba(226,179,74,0.18), rgba(196,149,36,0.08));
+  border: 1px solid rgba(226,179,74,0.22);
+}
+.thumb-silver {
+  background: linear-gradient(135deg, rgba(200,211,224,0.16), rgba(200,211,224,0.04));
+  border: 1px solid rgba(200,211,224,0.18);
+}
+
+.entry-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #f4ecd6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-meta {
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 10.5px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #5a4f3f;
+  letter-spacing: 0.3px;
+}
+
+.meta-pill {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.meta-physical {
+  background: rgba(123,211,160,0.10);
+  color: #7bd3a0;
+}
+.meta-digital {
+  background: rgba(120,170,255,0.10);
+  color: #82adff;
+}
+.meta-date {
+  color: #5a4f3f;
+}
+.meta-collateral {
+  color: #ef6b6b;
+  font-weight: 600;
+}
+
+.entry-img {
+  max-width: 100%;
+  max-height: 80px;
+  border-radius: 6px;
+  object-fit: contain;
+  border: 1px solid rgba(255,255,255,0.06);
+  margin-top: 6px;
+}
+
+.entry-records {
+  margin-top: 6px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 6px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.card-name {
-  font-weight: 500;
-  font-size: 0.95rem;
-  color: var(--t1);
-}
-
-.card-image {
-  max-width: 100%;
-  max-height: 120px;
-  border-radius: 6px;
-  object-fit: contain;
-  border: 1px solid var(--border-dim);
-  margin: 4px 0;
-}
-
-.card-details {
-  font-size: 0.8rem;
-  color: var(--t2);
+.record-row-inner {
   display: flex;
   align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
 }
 
-.card-dot {
-  color: var(--t3);
+.rec-date {
+  flex: 1;
+  color: #5a4f3f;
+  font-family: 'JetBrains Mono', monospace;
 }
-
-.card-date {
-  font-size: 0.72rem;
-  color: var(--t3);
-  margin-top: 2px;
+.rec-gram {
+  font-weight: 600;
+  color: #f4ecd6;
+  font-family: 'JetBrains Mono', monospace;
 }
-
-.card-records {
-  margin-top: 8px;
-}
-
-.record-delete {
-  margin-left: auto;
+.rec-del {
   background: none;
   border: none;
-  color: var(--t3);
-  font-size: 0.75rem;
+  color: #5a4f3f;
+  font-size: 10px;
   cursor: pointer;
-  padding: 1px 5px;
+  padding: 2px 5px;
   border-radius: 4px;
-  line-height: 1;
+  transition: color 0.15s;
+}
+.rec-del:hover {
+  color: #ef6b6b;
+}
+
+.entry-weight {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.wt-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f4ecd6;
+  font-variant-numeric: tabular-nums;
+}
+.wt-unit {
+  font-size: 11px;
+  color: #5a4f3f;
+  font-weight: 400;
+  margin-left: 2px;
+}
+.wt-rm {
+  font-size: 10.5px;
+  color: #5a4f3f;
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-side-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.entry-edit {
+  color: #5a4f3f;
+  font-size: 13px;
+  text-decoration: none;
+  padding: 3px 6px;
+  border-radius: 5px;
   transition: color 0.15s, background 0.15s;
 }
-.record-delete:hover {
-  color: var(--red);
-  background: var(--red-a);
+.entry-edit:hover {
+  color: #f4ecd6;
+  background: rgba(255,255,255,0.06);
 }
 
-.collateral-tag {
-  color: var(--red);
-  font-weight: 500;
+.entry-del {
+  background: none;
+  border: none;
+  color: #5a4f3f;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 5px;
+  transition: color 0.15s, background 0.15s;
+}
+.entry-del:hover {
+  color: #ef6b6b;
+  background: rgba(239,107,107,0.08);
 }
 
-.bulk-tag {
-  color: #c8a35a;
-  font-weight: 500;
+.collapse-caret {
+  color: #5a4f3f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: transform 0.2s, color 0.15s;
+}
+.collapse-caret.expanded {
+  transform: rotate(180deg);
+  color: #e2b34a;
 }
 
-/* ── Footer ── */
-.footer {
+/* ── Bayar Footer ── */
+.bayar-footer {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   max-width: 480px;
   margin: 0 auto;
-  padding: 12px 16px;
-  background: rgba(13, 11, 8, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 10px 14px 14px;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.5));
   z-index: 10;
 }
 
-.footer-info {
+.bayar-card {
+  background: linear-gradient(135deg, rgba(226,179,74,0.10), rgba(196,149,36,0.02));
+  border: 1px solid rgba(212,160,23,0.18);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background-color: rgba(10, 8, 6, 0.88);
+}
+
+.bayar-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
-.footer-label {
-  font-size: 0.68rem;
-  color: var(--t3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.bayar-amount-row {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin-top: 2px;
 }
 
-.footer-amount {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--t1);
-  line-height: 1.1;
+.bayar-rm {
+  font-size: 12px;
+  color: #a89878;
+  font-family: 'JetBrains Mono', monospace;
 }
 
-.btn-bayar {
-  background: var(--gold);
-  color: #0d0b08;
+.bayar-int {
+  font-family: 'Fraunces', 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: #f4ecd6;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.bayar-dec {
+  font-family: 'Fraunces', 'Cormorant Garamond', serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #a89878;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-bayar-cta {
+  background: linear-gradient(180deg, #e2b34a, #c49524);
+  color: #0a0806;
   border: none;
-  padding: 11px 24px;
-  border-radius: var(--r-md);
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
   font-family: 'Outfit', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(212, 160, 23, 0.28);
-  transition: background 0.15s, transform 0.15s;
+  box-shadow: 0 6px 18px rgba(226,179,74,0.16), inset 0 1px 0 rgba(255,255,255,0.3);
+  letter-spacing: 0.2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.15s, transform 0.15s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
-.btn-bayar:hover {
-  background: var(--gold-bright);
+.btn-bayar-cta:hover {
+  opacity: 0.9;
   transform: translateY(-1px);
 }
 
 .btn-bayar-future {
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--gold);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #e2b34a;
   padding: 7px 12px;
-  border-radius: var(--r-sm);
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.72rem;
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
   font-weight: 500;
   cursor: default;
   text-align: center;
   max-width: 140px;
   line-height: 1.4;
+  flex-shrink: 0;
 }
 
-.footer-status {
-  font-size: 0.78rem;
-  color: var(--t3);
-  padding: 7px 12px;
+.bayar-status {
+  font-size: 13px;
+  color: #5a4f3f;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
 }
 
-/* ── Floating Share Button ── */
-.btn-share {
+/* ── Float buttons ── */
+.btn-float {
   position: fixed;
-  bottom: 128px;
-  right: 16px;
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--card);
-  border: 1px solid var(--border);
-  color: var(--gold);
+  background: #181410;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #e2b34a;
   cursor: pointer;
-  z-index: 10;
+  z-index: 15;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   transition: background 0.15s, border-color 0.15s;
 }
-.btn-share:hover {
-  background: var(--card-hover);
-  border-color: var(--gold-a2);
+.btn-float:hover {
+  background: #1e1913;
+  border-color: rgba(226,179,74,0.18);
 }
-
-/* ── Share Modal Content ── */
-.share-qr-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-.share-qr {
-  width: 220px;
-  height: 220px;
-  border-radius: var(--r-sm);
-}
-.share-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--t2);
-  font-size: 0.88rem;
-  padding: 16px 0;
-}
-.share-spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--border-dim);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-.share-url-box {
-  background: var(--surface);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--r-sm);
-  padding: 10px 14px;
-  margin-bottom: 14px;
-  word-break: break-all;
-  max-height: 80px;
-  overflow-y: auto;
-}
-.share-url-text {
-  font-size: 0.72rem;
-  color: var(--t2);
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  line-height: 1.5;
-}
-.btn-submit.copied {
-  background: #2d6a4f;
-  box-shadow: 0 4px 16px rgba(45, 106, 79, 0.3);
-}
-.share-empty {
-  color: var(--t2);
-  font-size: 0.88rem;
-  padding: 12px 0;
-}
-
-/* ── Floating Info Button ── */
-.btn-info {
-  position: fixed;
-  bottom: 80px;
+.btn-float-share {
+  bottom: 104px;
   right: 16px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--card);
-  border: 1px solid var(--border);
-  color: var(--gold);
-  font-size: 1rem;
-  font-weight: 700;
-  font-style: italic;
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  transition: background 0.15s, border-color 0.15s;
-}
-.btn-info:hover {
-  background: var(--card-hover);
-  border-color: var(--gold-a2);
 }
 
-/* ── Modal Content ── */
+/* ── Modals (shared from global, minimal overrides) ── */
 .modal-icon {
   font-size: 1.8rem;
-  color: var(--gold);
+  color: #e2b34a;
   margin-bottom: 8px;
   opacity: 0.8;
 }
 
 .modal-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Fraunces', 'Cormorant Garamond', serif;
   font-size: 1.4rem;
   font-weight: 600;
   margin: 0 0 4px;
-  color: var(--t1);
+  color: #f4ecd6;
 }
 
 .modal-subtitle {
   font-size: 0.82rem;
-  color: var(--t2);
+  color: #a89878;
   margin: 0 0 18px;
 }
 
@@ -1093,9 +1722,9 @@ const copyShareUrl = async () => {
 }
 
 .modal-prices {
-  background: var(--surface);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--r-sm);
+  background: #161210;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
   padding: 12px 14px;
   margin-bottom: 16px;
   text-align: left;
@@ -1105,26 +1734,27 @@ const copyShareUrl = async () => {
   display: flex;
   justify-content: space-between;
   font-size: 0.84rem;
-  color: var(--t2);
+  color: #a89878;
   padding: 3px 0;
 }
 
 .modal-price-value {
   font-weight: 600;
-  color: var(--t1);
+  color: #f4ecd6;
 }
 
 .modal-price-updated {
   font-size: 0.68rem;
-  color: var(--t3);
+  color: #5a4f3f;
   margin-top: 6px;
   text-align: right;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .modal-bayar-info {
-  background: var(--surface);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--r-sm);
+  background: #161210;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
   padding: 12px 14px;
   margin: 14px 0;
   text-align: left;
@@ -1134,23 +1764,23 @@ const copyShareUrl = async () => {
   display: flex;
   justify-content: space-between;
   font-size: 0.84rem;
-  color: var(--t2);
+  color: #a89878;
   padding: 4px 0;
 }
 
 .modal-bayar-row + .modal-bayar-row {
-  border-top: 1px solid var(--border-dim);
+  border-top: 1px solid rgba(255,255,255,0.06);
   margin-top: 2px;
   padding-top: 6px;
 }
 
 .modal-bayar-value {
   font-weight: 600;
-  color: var(--t1);
+  color: #f4ecd6;
 }
 
 .modal-bayar-amount {
-  color: var(--gold-bright);
+  color: #e2b34a;
   font-size: 0.95rem;
 }
 
@@ -1158,33 +1788,87 @@ const copyShareUrl = async () => {
   display: block;
   margin: 14px 0 4px;
   padding: 11px 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  color: var(--gold-bright);
+  background: #161210;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: #e2b34a;
   font-weight: 600;
   font-size: 0.88rem;
   text-decoration: none;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s;
 }
 .btn-bayar-link:hover {
-  background: var(--gold-a);
-  border-color: var(--border);
+  background: rgba(226,179,74,0.08);
 }
 
 .modal-credit {
   font-size: 0.68rem;
-  color: var(--t3);
+  color: #5a4f3f;
   margin: 14px 0 0;
 }
 .modal-credit + .modal-credit {
   margin-top: 3px;
 }
 .modal-credit a {
-  color: var(--t2);
+  color: #a89878;
   text-decoration: none;
 }
 .modal-credit a:hover {
-  color: var(--t1);
+  color: #f4ecd6;
+}
+
+/* Share modal */
+.share-qr-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.share-qr {
+  width: 220px;
+  height: 220px;
+  border-radius: 8px;
+}
+.share-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #a89878;
+  font-size: 0.88rem;
+  padding: 16px 0;
+}
+.share-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.06);
+  border-top-color: #e2b34a;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.share-url-box {
+  background: #161210;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  word-break: break-all;
+  max-height: 80px;
+  overflow-y: auto;
+}
+.share-url-text {
+  font-size: 0.72rem;
+  color: #a89878;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.5;
+}
+.btn-submit.copied {
+  background: #2d6a4f;
+  box-shadow: 0 4px 16px rgba(45,106,79,0.3);
+}
+.share-empty {
+  color: #a89878;
+  font-size: 0.88rem;
+  padding: 12px 0;
 }
 </style>
