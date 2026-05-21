@@ -96,7 +96,7 @@
         <span class="nisab-pct-label">{{ nisabPct }}%</span>
       </div>
       <div class="nisab-grams">
-        <span class="big-num">{{ nisabWeight.toFixed(2) }}</span>
+        <span class="big-num">{{ nisabDisplayWeight.toFixed(2) }}</span>
         <span class="unit-g">g</span>
         <span class="nisab-of">/ 85g nisab</span>
       </div>
@@ -731,9 +731,21 @@ const weekChangeText = computed(() => {
   return `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
 })
 
-// ── Nisab meter ──
-const nisabPct = computed(() => Math.min(100, Math.round((nisabWeight.value / NISAB_GRAM) * 100)))
-const nisabRemaining = computed(() => Math.max(0, NISAB_GRAM - nisabWeight.value).toFixed(2))
+// ── Nisab meter (all gold, no haul filter) ──
+const nisabDisplayWeight = computed(() => {
+  let total = 0
+  for (const e of entries.value) {
+    if (e.metal_type !== 'gold') continue
+    if (e.metal_state === 'digital') {
+      total += e.gram
+    } else if (!e.is_worn || isPerlis.value) {
+      total += getAdjustedGram(e)
+    }
+  }
+  return parseFloat(total.toFixed(3))
+})
+const nisabPct = computed(() => Math.min(100, Math.round((nisabDisplayWeight.value / NISAB_GRAM) * 100)))
+const nisabRemaining = computed(() => Math.max(0, NISAB_GRAM - nisabDisplayWeight.value).toFixed(2))
 
 // ── Portfolio ──
 const portfolioTotal = computed(() =>
