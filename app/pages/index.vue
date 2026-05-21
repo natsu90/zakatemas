@@ -95,6 +95,50 @@
       </div>
     </section>
 
+    <!-- ── Uruf Emas Meter ── -->
+    <section v-if="!isPerlis && urufDisplayWeight > 0" class="info-card">
+      <div class="nisab-head">
+        <span class="eyebrow muted">Menuju Uruf Emas</span>
+        <span class="nisab-pct-label">{{ urufPct }}%</span>
+      </div>
+      <div class="nisab-grams">
+        <span class="big-num">{{ urufDisplayWeight.toFixed(2) }}</span>
+        <span class="unit-g">g</span>
+        <span class="nisab-of">/ {{ URUF_GOLD_GRAM }}g uruf</span>
+      </div>
+      <div class="progress-outer">
+        <div class="progress-track">
+          <div class="progress-fill" :style="{ width: urufPct + '%' }"></div>
+        </div>
+        <div v-for="t in [25, 50, 75]" :key="t" class="progress-tick" :style="{ left: t + '%' }"></div>
+      </div>
+      <div class="nisab-caption">
+        Baki <span class="nisab-highlight">{{ urufRemaining }}g</span> sebelum wajib zakat emas kemas.
+      </div>
+    </section>
+
+    <!-- ── Uruf Perak Meter ── -->
+    <section v-if="silverDisplayWeight > 0" class="info-card">
+      <div class="nisab-head">
+        <span class="eyebrow muted">Menuju Uruf Perak</span>
+        <span class="nisab-pct-label silver-pct-label">{{ silverPct }}%</span>
+      </div>
+      <div class="nisab-grams">
+        <span class="big-num">{{ silverDisplayWeight.toFixed(2) }}</span>
+        <span class="unit-g">g</span>
+        <span class="nisab-of">/ {{ URUF_SILVER_GRAM }}g uruf</span>
+      </div>
+      <div class="progress-outer">
+        <div class="progress-track">
+          <div class="progress-fill progress-fill-silver" :style="{ width: silverPct + '%' }"></div>
+        </div>
+        <div v-for="t in [25, 50, 75]" :key="t" class="progress-tick" :style="{ left: t + '%' }"></div>
+      </div>
+      <div class="nisab-caption">
+        Baki <span class="nisab-highlight-silver">{{ silverRemaining }}g</span> sebelum wajib zakat perak.
+      </div>
+    </section>
+
     <!-- ── Portfolio ── -->
     <section v-if="entries.length && portfolioTotal > 0" class="info-card">
       <div class="portfolio-head">
@@ -720,6 +764,27 @@ const nisabDisplayWeight = computed(() => {
 const nisabPct = computed(() => Math.min(100, Math.round((nisabDisplayWeight.value / NISAB_GRAM) * 100)))
 const nisabRemaining = computed(() => Math.max(0, NISAB_GRAM - nisabDisplayWeight.value).toFixed(2))
 
+// ── Uruf Emas meter (worn gold, no haul filter) ──
+const urufDisplayWeight = computed(() => {
+  let total = 0
+  for (const e of entries.value) {
+    if (e.metal_type === 'gold' && e.metal_state === 'physical' && e.is_worn) {
+      total += getAdjustedGram(e)
+    }
+  }
+  return parseFloat(total.toFixed(3))
+})
+const urufPct = computed(() => {
+  if (!URUF_GOLD_GRAM.value) return 0
+  return Math.min(100, Math.round((urufDisplayWeight.value / URUF_GOLD_GRAM.value) * 100))
+})
+const urufRemaining = computed(() => Math.max(0, URUF_GOLD_GRAM.value - urufDisplayWeight.value).toFixed(2))
+
+// ── Uruf Perak meter (all silver, no haul filter) ──
+const silverDisplayWeight = computed(() => summarySilver.value.gram)
+const silverPct = computed(() => Math.min(100, Math.round((silverDisplayWeight.value / URUF_SILVER_GRAM) * 100)))
+const silverRemaining = computed(() => Math.max(0, URUF_SILVER_GRAM - silverDisplayWeight.value).toFixed(2))
+
 // ── Portfolio ──
 const portfolioTotal = computed(() =>
   summaryInvest.value.worth + summaryWorn.value.worth + summarySilver.value.worth
@@ -1187,6 +1252,24 @@ const copyShareUrl = async () => {
   color: #e2b34a;
   font-weight: 600;
   font-family: 'JetBrains Mono', monospace;
+}
+
+.nisab-highlight-silver {
+  color: #c8d3e0;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.silver-pct-label {
+  color: #c8d3e0;
+}
+
+.progress-fill-silver {
+  height: 100%;
+  background: linear-gradient(90deg, #8fa3b8, #c8d3e0);
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(200, 211, 224, 0.14);
+  transition: width 0.5s ease;
 }
 
 /* Portfolio */
