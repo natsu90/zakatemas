@@ -49,22 +49,6 @@
         </div>
       </div>
 
-      <!-- Sparkline -->
-      <div class="sparkline-wrap">
-        <svg class="sparkline-svg" viewBox="0 0 310 48" preserveAspectRatio="none" overflow="visible">
-          <defs>
-            <linearGradient id="sparkFill" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stop-color="#e2b34a" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#e2b34a" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <path :d="sparkArea" fill="url(#sparkFill)"/>
-          <path :d="sparkLine" stroke="#e2b34a" stroke-width="1.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-          <circle :cx="sparkDotX" :cy="sparkDotY" r="6" fill="#e2b34a" opacity="0.18"/>
-          <circle :cx="sparkDotX" :cy="sparkDotY" r="2.6" fill="#e2b34a"/>
-        </svg>
-      </div>
-
       <!-- Karat tabs -->
       <div class="karat-tabs">
         <button
@@ -293,17 +277,6 @@
           <option value="" disabled>-- Pilih negeri --</option>
           <option v-for="s in STATE_URUF" :key="s.label" :value="s.label">{{ s.label }} — {{ s.label === 'Perlis' ? 'Tiada Uruf, Ikut Nisab 85g' : s.value + 'g' }}</option>
         </select>
-        <div class="modal-prices">
-          <div class="modal-price-row">
-            <span>Emas 999</span>
-            <span class="modal-price-value">RM {{ GOLD_PRICE.toFixed(2) }}/g</span>
-          </div>
-          <div class="modal-price-row">
-            <span>Perak</span>
-            <span class="modal-price-value">RM {{ SILVER_PRICE.toFixed(2) }}/g</span>
-          </div>
-          <div class="modal-price-updated">Dikemaskini {{ formatDateTime(prices.updated_at) }}</div>
-        </div>
         <button class="btn-submit" :disabled="!modalState" @click="saveState">Simpan</button>
         <p class="modal-credit">Dibina oleh <a href="https://sulai.mn/" target="_blank" rel="noopener">Sulaiman Sudirman</a></p>
         <p class="modal-credit">Maklumbalas: <a href="mailto:contact@zakatemas.app">contact@zakatemas.app</a></p>
