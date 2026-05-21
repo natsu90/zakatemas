@@ -254,7 +254,7 @@
     <div v-if="displayItems.length" class="bayar-footer">
       <div class="bayar-card">
         <div class="bayar-info">
-          <div class="eyebrow">Jumlah Zakat Wajib</div>
+          <div class="eyebrow">{{ hasNisab ? 'Jumlah Zakat Wajib' : futureZakat ? 'Anggaran Zakat' : 'Jumlah Zakat' }}</div>
           <div class="bayar-amount-row">
             <span class="bayar-rm">RM</span>
             <span class="bayar-int">{{ zakatInt.toLocaleString('en-MY') }}</span>
@@ -746,8 +746,13 @@ const zakatPct = computed(() => {
 })
 
 // ── Bayar footer ──
-const zakatInt = computed(() => Math.floor(zakatAmount.value))
-const zakatDec = computed(() => (zakatAmount.value % 1).toFixed(2).slice(2))
+const displayZakatAmount = computed(() => {
+  if (hasNisab.value) return zakatAmount.value
+  if (futureZakat.value) return futureZakat.value.amount
+  return 0
+})
+const zakatInt = computed(() => Math.floor(displayZakatAmount.value))
+const zakatDec = computed(() => (displayZakatAmount.value % 1).toFixed(2).slice(2))
 
 // ── Entry RM helper ──
 const entryRm = (e: any) => {
