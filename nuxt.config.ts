@@ -11,7 +11,7 @@ export default defineNuxtConfig({
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: 'Kalkulator zakat emas dan perak mengikut kadar semasa. Kira zakat fizikal, digital, barang kemas dan pelaburan dengan mudah.' },
-        { name: 'theme-color', content: '#d4a017' },
+        { name: 'theme-color', content: '#e2b34a' },
         { property: 'og:type', content: 'website' },
         { property: 'og:site_name', content: 'Kalkulator Zakat Emas & Perak' },
         { property: 'og:title', content: 'Kalkulator Zakat Emas & Perak' },
@@ -25,7 +25,7 @@ export default defineNuxtConfig({
         { name: 'apple-mobile-web-app-title', content: 'ZakatEmas' },
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
         { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
@@ -51,6 +51,7 @@ export default defineNuxtConfig({
       background_color: '#0d0b08',
       lang: 'ms',
       icons: [
+        { src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml' },
         { src: '/pwa-64x64.png', sizes: '64x64', type: 'image/png' },
         { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
         { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
