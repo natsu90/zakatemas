@@ -226,7 +226,7 @@
                 </div>
               </div>
               <div class="entry-weight">
-                <div class="wt-num">{{ item.totalGram.toFixed(item.totalGram >= 100 ? 1 : 2) }}<span class="wt-unit">g</span></div>
+                <div class="wt-num">{{ (item.totalGram ?? 0).toFixed((item.totalGram ?? 0) >= 100 ? 1 : 2) }}<span class="wt-unit">g</span></div>
                 <div class="wt-rm">RM {{ Math.round(item.totalGram * (item.metal_type === 'gold' ? GOLD_PRICE : SILVER_PRICE)).toLocaleString('en-MY') }}</div>
               </div>
               <div class="entry-side-actions">
@@ -264,7 +264,7 @@
                 <img v-if="item.entry.image_string" :src="item.entry.image_string" class="entry-img"/>
               </div>
               <div class="entry-weight">
-                <div class="wt-num">{{ item.entry.gram.toFixed(item.entry.gram >= 100 ? 1 : 2) }}<span class="wt-unit">g</span></div>
+                <div class="wt-num">{{ (Number(item.entry.gram) || 0).toFixed((Number(item.entry.gram) || 0) >= 100 ? 1 : 2) }}<span class="wt-unit">g</span></div>
                 <div class="wt-rm">RM {{ entryRm(item.entry).toLocaleString('en-MY') }}</div>
               </div>
               <div class="entry-side-actions">
@@ -430,7 +430,7 @@ const displayItems = computed<DisplayItem[]>(() => {
       key: `digital-${platform}`,
       platform,
       metal_type: group[0].metal_type,
-      totalGram: parseFloat(group.reduce((sum: number, e: any) => sum + e.gram, 0).toFixed(3)),
+      totalGram: parseFloat(group.reduce((sum: number, e: any) => sum + (Number(e.gram) || 0), 0).toFixed(3)),
       count: group.length,
       entries: group,
     })
@@ -490,9 +490,10 @@ const hasHaul = (dateStr: string) => {
 }
 
 const getAdjustedGram = (e: any) => {
+  const gram = Number(e.gram) || 0
   const base = e.gold_percent && e.gold_percent !== 999
-    ? e.gram * (e.gold_percent / 1000)
-    : e.gram
+    ? gram * (e.gold_percent / 1000)
+    : gram
   if (e.is_collateral && e.loan_amount) {
     const netValue = base * GOLD_PRICE.value - e.loan_amount
     return netValue > 0 ? netValue / GOLD_PRICE.value : 0
@@ -505,7 +506,7 @@ const nisabWeight = computed(() => {
   for (const e of entries.value) {
     if (e.metal_type !== 'gold' || !hasHaul(e.date)) continue
     if (e.metal_state === 'digital') {
-      total += e.gram
+      total += Number(e.gram) || 0
     } else if (!e.is_worn || isPerlis.value) {
       total += getAdjustedGram(e)
     }
@@ -529,7 +530,7 @@ const silverWeight = computed(() => {
   let total = 0
   for (const e of entries.value) {
     if (e.metal_type === 'silver' && hasHaul(e.date)) {
-      total += e.gram
+      total += Number(e.gram) || 0
     }
   }
   return parseFloat(total.toFixed(3))
@@ -539,7 +540,7 @@ const summaryInvest = computed(() => {
   let gram = 0
   for (const e of entries.value) {
     if (e.metal_type !== 'gold') continue
-    if (e.metal_state === 'digital') gram += e.gram
+    if (e.metal_state === 'digital') gram += Number(e.gram) || 0
     else if (!e.is_worn) gram += getAdjustedGram(e)
   }
   gram = parseFloat(gram.toFixed(3))
@@ -560,7 +561,7 @@ const summaryWorn = computed(() => {
 const summarySilver = computed(() => {
   let gram = 0
   for (const e of entries.value) {
-    if (e.metal_type === 'silver') gram += e.gram
+    if (e.metal_type === 'silver') gram += Number(e.gram) || 0
   }
   gram = parseFloat(gram.toFixed(3))
   return { gram, worth: gram * SILVER_PRICE.value }
@@ -806,9 +807,10 @@ const zakatDec = computed(() => (displayZakatAmount.value % 1).toFixed(2).slice(
 
 // ── Entry RM helper ──
 const entryRm = (e: any) => {
-  if (e.metal_type === 'silver') return Math.round(e.gram * SILVER_PRICE.value)
+  const gram = Number(e.gram) || 0
+  if (e.metal_type === 'silver') return Math.round(gram * SILVER_PRICE.value)
   const purity = (e.gold_percent || 999) / 999
-  return Math.round(e.gram * GOLD_PRICE.value * purity)
+  return Math.round(gram * GOLD_PRICE.value * purity)
 }
 
 // ── Share ──
